@@ -1,0 +1,33 @@
+<Bindings module-name="test">
+
+  <FunctionSpec name="threeInThreeOut">
+    <In>
+        <Parameter type="number" name="in_param1"/>
+        <Parameter type="string" name="in_param2"/>
+        <Parameter type="userdata" name="in_param3"/>
+    </In>
+
+    <Out>
+        <Parameter type="number" name="out_param"/>
+        <Parameter type="string" name="out_param1"/>
+        <Parameter type="userdata" name="out_param2"/>
+    </Out>
+  </FunctionSpec>
+
+  <FunctionSpec name="theeInZeroOut">
+    <In>
+      <Parameter type="number" name="out_param"/>
+      <Parameter type="string" name="out_param1"/>
+      <Parameter type="userdata" name="out_param2"/>
+    </In>
+  </FunctionSpec>
+  
+  <FunctionSpec name="zeroInThreeOut">
+    <Out>
+      <Parameter type="number" name="out_param"/>
+      <Parameter type="string" name="out_param1"/>
+      <Parameter type="userdata" name="out_param2"/>
+    </Out>
+  </FunctionSpec>
+
+</Bindings>

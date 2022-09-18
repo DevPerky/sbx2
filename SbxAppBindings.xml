@@ -1,0 +1,51 @@
+<Bindings module-name="App">
+    <FunctionSpec name="CreateWindow">
+        <In>
+            <Parameter type="number" name="width"/>
+            <Parameter type="number" name="height"/>
+            <Parameter type="string" name="title"/>
+        </In>
+
+        <Out>
+            <Parameter type="userdata" name="window"/>
+        </Out>
+    </FunctionSpec>
+	
+	<FunctionSpec name="CloseWindow">
+		<In>
+			<Parameter type="userdata" name="window"/>
+		</In>
+	</FunctionSpec>
+	
+	<FunctionSpec name="GetMouseXY">
+		<In>
+			<Parameter type="userdata" name="window"/>
+		</In>
+		<Out>
+			<Parameter type="number" name="X"/>
+			<Parameter type="number" name="Y"/>
+		</Out>
+	</FunctionSpec>
+	
+	<FunctionSpec name="GetWindowDimensions">
+		<In>
+			<Parameter type="userdata" name="window"/>
+		</In>
+		<Out>
+			<Parameter type="number" name="width"/>
+			<Parameter type="number" name="height"/>
+		</Out>
+	</FunctionSpec>
+
+	<FunctionSpec name="SetTargetFPS">
+		<In>
+			<Parameter type="number" name="fps"/>
+		</In>
+	</FunctionSpec>
+
+	<FunctionSpec name="GetSeconds">
+		<Out>
+			<Parameter type="number" name="seconds"/>
+		</Out>
+	</FunctionSpec>
+</Bindings>

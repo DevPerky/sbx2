@@ -1,0 +1,39 @@
+<Bindings module-name="Draw">
+    <FunctionSpec name="SetDrawColor">
+        <In>
+            <Parameter name="red" type="number"/>
+            <Parameter name="green" type="number"/>
+            <Parameter name="blue" type="number"/>
+            <Parameter name="alpha" type="number"/>
+        </In>
+    </FunctionSpec>
+    
+    <FunctionSpec name="DrawRectangle">
+        <In>
+            <Parameter name="left" type="number"/>
+            <Parameter name="top" type="number"/>
+            <Parameter name="right" type="number"/>
+            <Parameter name="bottom" type="number"/>
+        </In>
+    </FunctionSpec>
+
+    <FunctionSpec name="DrawLine">
+        <In>
+            <Parameter name="fromX" type="number"/>
+            <Parameter name="fromY" type="number"/>
+            <Parameter name="toX" type="number"/>
+            <Parameter name="toY" type="number"/>
+            <Parameter name="width" type="number"/>
+        </In>
+    </FunctionSpec>    
+
+    <FunctionSpec name="Clear">
+        <In>
+            <Parameter name="red" type="number"/>
+            <Parameter name="green" type="number"/>
+            <Parameter name="blue" type="number"/>
+            <Parameter name="alpha" type="number"/>
+        </In>
+    </FunctionSpec>
+
+</Bindings>
