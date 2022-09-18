@@ -3,26 +3,11 @@
 
 #include <vector>
 #include <string>
+#include "parameter.hpp"
 
 class FunctionSpec {
 
 public:
-	class Parameter {
-
-	public:
-		enum class Type {
-			Number,
-			String,
-			UserData
-		};
-
-		std::string name;
-		Type type;
-
-		Parameter(const std::string& name, Type type)
-			: name(name), type(type) {}
-	};
-
 	inline const std::string& getName() const {
 		return m_name;
 	}

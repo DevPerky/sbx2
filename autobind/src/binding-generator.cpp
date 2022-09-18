@@ -6,33 +6,33 @@
 
 static const std::string functionPointerSetterParameterName = "function";
 
-static std::unordered_map<FunctionSpec::Parameter::Type, std::string> parameterTypeToCParameterStringMap() {
-	std::unordered_map<FunctionSpec::Parameter::Type, std::string> parameterTypeStrings;
+static std::unordered_map<Parameter::Type, std::string> parameterTypeToCParameterStringMap() {
+	std::unordered_map<Parameter::Type, std::string> parameterTypeStrings;
 
-	parameterTypeStrings[FunctionSpec::Parameter::Type::Number] = "double";
-	parameterTypeStrings[FunctionSpec::Parameter::Type::String] = "const char *";
-	parameterTypeStrings[FunctionSpec::Parameter::Type::UserData] = "void *";
-
-	return parameterTypeStrings;
-}
-
-static std::unordered_map<FunctionSpec::Parameter::Type, std::string> parameterTypeToLuaParameterStringMap() {
-	std::unordered_map<FunctionSpec::Parameter::Type, std::string> parameterTypeStrings;
-
-	parameterTypeStrings[FunctionSpec::Parameter::Type::Number] = "number";
-	parameterTypeStrings[FunctionSpec::Parameter::Type::String] = "string";
-	parameterTypeStrings[FunctionSpec::Parameter::Type::UserData] = "userdata";
+	parameterTypeStrings[Parameter::Type::Number] = "double";
+	parameterTypeStrings[Parameter::Type::String] = "const char *";
+	parameterTypeStrings[Parameter::Type::UserData] = "void *";
 
 	return parameterTypeStrings;
 }
 
-static std::string generateCParameter(const FunctionSpec::Parameter &parameter, bool out) {
+static std::unordered_map<Parameter::Type, std::string> parameterTypeToLuaParameterStringMap() {
+	std::unordered_map<Parameter::Type, std::string> parameterTypeStrings;
+
+	parameterTypeStrings[Parameter::Type::Number] = "number";
+	parameterTypeStrings[Parameter::Type::String] = "string";
+	parameterTypeStrings[Parameter::Type::UserData] = "userdata";
+
+	return parameterTypeStrings;
+}
+
+static std::string generateCParameter(const Parameter &parameter, bool out) {
 	std::stringstream stringStream;
-	std::unordered_map<FunctionSpec::Parameter::Type, std::string> parameterTypeStrings;
+	std::unordered_map<Parameter::Type, std::string> parameterTypeStrings;
 
-	parameterTypeStrings[FunctionSpec::Parameter::Type::Number] = "double";
-	parameterTypeStrings[FunctionSpec::Parameter::Type::String] = "const char *";
-	parameterTypeStrings[FunctionSpec::Parameter::Type::UserData] = "void *";
+	parameterTypeStrings[Parameter::Type::Number] = "double";
+	parameterTypeStrings[Parameter::Type::String] = "const char *";
+	parameterTypeStrings[Parameter::Type::UserData] = "void *";
 	const std::string &typeString = parameterTypeStrings.at(parameter.type);
 
 	if (typeString.back() != '*') { // ensure the pointer is right next to the identifier
@@ -46,10 +46,10 @@ static std::string generateCParameter(const FunctionSpec::Parameter &parameter, 
 	stringStream << typeString;
 }
 
-static std::string generateCParameterInstance(const FunctionSpec::Parameter &parameter, bool pointer) {
+static std::string generateCParameterInstance(const Parameter &parameter, bool pointer) {
 	std::stringstream stringStream;
 	
-	std::unordered_map<FunctionSpec::Parameter::Type, std::string> parameterTypeStrings = parameterTypeToCParameterStringMap();
+	std::unordered_map<Parameter::Type, std::string> parameterTypeStrings = parameterTypeToCParameterStringMap();
 	const std::string &typeString = parameterTypeStrings.at(parameter.type);
 
 	stringStream << typeString;
@@ -66,7 +66,7 @@ static std::string generateCParameterInstance(const FunctionSpec::Parameter &par
 	return stringStream.str();
 }
 
-static std::string generateCParameterList(const std::vector<FunctionSpec::Parameter> &parameters, bool out) {
+static std::string generateCParameterList(const std::vector<Parameter> &parameters, bool out) {
 	std::stringstream stringStream;	
 
 	for (auto &param : parameters) {
@@ -154,31 +154,31 @@ static void writeFunctionPointerSetterImplementations(const std::vector<Function
 }
 
 static void writeBindingImplementation(const FunctionSpec &functionSpec, std::stringstream &stringStream) {
-	std::unordered_map<FunctionSpec::Parameter::Type, std::string> 
+	std::unordered_map<Parameter::Type, std::string> 
 		parameterTypeStrings = parameterTypeToCParameterStringMap();
 
-	std::unordered_map<FunctionSpec::Parameter::Type, std::string>
+	std::unordered_map<Parameter::Type, std::string>
 		luaParameterTypes = parameterTypeToLuaParameterStringMap();
 
-	std::unordered_map<FunctionSpec::Parameter::Type, std::string> parameterCheckTypeFunctions;
-	parameterCheckTypeFunctions[FunctionSpec::Parameter::Type::Number] = "lua_isnumber";
-	parameterCheckTypeFunctions[FunctionSpec::Parameter::Type::String] = "lua_isstring";
-	parameterCheckTypeFunctions[FunctionSpec::Parameter::Type::UserData] = "lua_isuserdata";
+	std::unordered_map<Parameter::Type, std::string> parameterCheckTypeFunctions;
+	parameterCheckTypeFunctions[Parameter::Type::Number] = "lua_isnumber";
+	parameterCheckTypeFunctions[Parameter::Type::String] = "lua_isstring";
+	parameterCheckTypeFunctions[Parameter::Type::UserData] = "lua_isuserdata";
 
-	std::unordered_map<FunctionSpec::Parameter::Type, std::string> getParameterValueFunctions;
-	getParameterValueFunctions[FunctionSpec::Parameter::Type::Number] = "lua_tonumber";
-	getParameterValueFunctions[FunctionSpec::Parameter::Type::String] = "lua_tostring";
-	getParameterValueFunctions[FunctionSpec::Parameter::Type::UserData] = "lua_touserdata";
+	std::unordered_map<Parameter::Type, std::string> getParameterValueFunctions;
+	getParameterValueFunctions[Parameter::Type::Number] = "lua_tonumber";
+	getParameterValueFunctions[Parameter::Type::String] = "lua_tostring";
+	getParameterValueFunctions[Parameter::Type::UserData] = "lua_touserdata";
 
-	std::unordered_map<FunctionSpec::Parameter::Type, std::string> luaPushValueFunctions;
-	luaPushValueFunctions[FunctionSpec::Parameter::Type::Number] = "lua_pushnumber";
-	luaPushValueFunctions[FunctionSpec::Parameter::Type::String] = "lua_pushstring";
-	luaPushValueFunctions[FunctionSpec::Parameter::Type::UserData] = "lua_pushlightuserdata";
+	std::unordered_map<Parameter::Type, std::string> luaPushValueFunctions;
+	luaPushValueFunctions[Parameter::Type::Number] = "lua_pushnumber";
+	luaPushValueFunctions[Parameter::Type::String] = "lua_pushstring";
+	luaPushValueFunctions[Parameter::Type::UserData] = "lua_pushlightuserdata";
 
 	stringStream << "static " << generateBindingFunctionPrototype(functionSpec.getName()) << " {" << std::endl;
 
-	const std::vector<FunctionSpec::Parameter> inParams = functionSpec.getParametersIn();
-	const std::vector<FunctionSpec::Parameter> outParams = functionSpec.getParametersOut();
+	const std::vector<Parameter> inParams = functionSpec.getParametersIn();
+	const std::vector<Parameter> outParams = functionSpec.getParametersOut();
 	
 	for (auto inParam : inParams) {
 		stringStream << '\t' << generateCParameterInstance(inParam, false) << ';' << std::endl;
