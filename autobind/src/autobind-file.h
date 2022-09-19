@@ -1,6 +1,7 @@
 #ifndef AUTOBIND_FILE_H
 #define AUTOBIND_FILE_H
 #include <vector>
+#include <unordered_map>
 #include "function-spec.h"
 #include "struct-spec.hpp"
 
@@ -16,9 +17,7 @@ public:
 		std::string moduleName, 
 		const std::vector<FunctionSpec> &functionSpecifications, 
 		const std::vector<StructSpec> &structSpecifications
-	) : m_moduleName(moduleName),
-		m_functionSpecifications(functionSpecifications),
-		m_structSpecifications(structSpecifications) {}
+	);
 
 	inline const std::vector<FunctionSpec> &getFunctionSpecifications() const {
 		return m_functionSpecifications;

@@ -101,6 +101,54 @@ static FunctionSpec parseFunctionElement(const tinyxml2::XMLElement *functionEle
 	return FunctionSpec(name, parametersIn, parametersOut);
 }
 
+static StructSpec parseStructElement(const tinyxml2::XMLElement *structElement) {
+	if (!elementNameEquals(structElement, "StructSpec")) {
+		throw "Wrong kind of element passed to function";
+	}
+
+	const char *name = structElement->FindAttribute("name")->Value();
+	const tinyxml2::XMLElement *element = 0;
+
+	std::vector<Parameter> members;
+	// Parse member elements
+	// TODO: find a way around this code repetition 
+	element = structElement->FirstChildElement("Members");
+	if (element) {
+		std::vector<Parameter> members = parseParameterElements(element);
+	}
+
+	//Check for same name parameters - Illegal!
+	bool doubleParams = false;
+	for (const auto &member : members) {
+		for (const auto &other : members) {
+			if (member.name == other.name && &member != &other) {
+				doubleParams = true;
+				break;
+			}
+		}
+
+		if(doubleParams) {
+			break;
+		}
+	}
+
+	if (doubleParams) {
+		throw "Two parameters can't have the same name!";
+	}
+
+	return StructSpec(name, members);
+}
+
+AutoBindFile::AutoBindFile(
+	std::string moduleName, 
+	const std::vector<FunctionSpec> &functionSpecifications, 
+	const std::vector<StructSpec> &structSpecifications
+) : m_moduleName(moduleName),
+		m_functionSpecifications(functionSpecifications),
+		m_structSpecifications(structSpecifications) {
+
+
+}
 AutoBindFile AutoBindFile::LoadFromXML(std::string filePath) {
 	tinyxml2::XMLDocument document;
 	if (document.LoadFile(filePath.c_str()) != tinyxml2::XML_SUCCESS) {
@@ -124,15 +172,19 @@ AutoBindFile AutoBindFile::LoadFromXML(std::string filePath) {
 
 	element = element->FirstChildElement();
 	std::vector<FunctionSpec> functionSpecifications;
-
+	std::vector<StructSpec> structSpecifications;
 	while(element) {
 		if (elementNameEquals(element, "FunctionSpec")) {
 			functionSpecifications.push_back(parseFunctionElement(element));
 		}
 
+		if (elementNameEquals(element, "StructSpec")) {
+			structSpecifications.push_back(parseStructElement(element));
+		}
+
 		element = element->NextSiblingElement();
 	}
 
-	return AutoBindFile(moduleNameAttribute->Value(), functionSpecifications, std::vector<StructSpec>());
+	return AutoBindFile(moduleNameAttribute->Value(), functionSpecifications, structSpecifications);
 
 }
