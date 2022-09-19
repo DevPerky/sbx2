@@ -8,13 +8,15 @@ class Parameter {
 		enum class Type {
 			Number,
 			String,
-			UserData
+			UserData,
+			Custom
 		};
 
 		std::string name;
+		std::string typeName;
 		Type type;
 
-		Parameter(const std::string& name, Type type)
-			: name(name), type(type) {}
+		Parameter(const std::string &name, Type type, const std::string &typeString)
+			: name(name), type(type), typeName(typeString) {}
 };
 #endif

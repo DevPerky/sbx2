@@ -1,7 +1,7 @@
+#include "autobind-file.h"
+
 #include <exception>
 #include <vector>
-#include "function-spec.h"
-#include "autobind-file.h"
 #include <tinyxml2.h>
 #include <unordered_map>
 #include <iterator>
@@ -31,7 +31,17 @@ static Parameter parseParameterElement(const tinyxml2::XMLElement *parameterElem
 		throw "parameter missing type";
 	}
 
-	return Parameter(name, parameterTypes[typeAttribute->Value()]);
+	Parameter::Type type;
+	const std::string &typeValue = typeAttribute->Value();
+
+	if(parameterTypes.count(typeValue) == 0) {
+		type = Parameter::Type::Custom;
+	}
+	else {
+		type = parameterTypes[typeValue];
+	}
+
+	return Parameter(name, type, typeValue);
 }
 
 static std::vector<Parameter> parseParameterElements(const tinyxml2::XMLElement *root) {
@@ -114,7 +124,7 @@ static StructSpec parseStructElement(const tinyxml2::XMLElement *structElement) 
 	// TODO: find a way around this code repetition 
 	element = structElement->FirstChildElement("Members");
 	if (element) {
-		std::vector<Parameter> members = parseParameterElements(element);
+		members = parseParameterElements(element);
 	}
 
 	//Check for same name parameters - Illegal!
@@ -147,8 +157,12 @@ AutoBindFile::AutoBindFile(
 		m_functionSpecifications(functionSpecifications),
 		m_structSpecifications(structSpecifications) {
 
+	for(auto &sp : structSpecifications) {
+		m_mapStructSpecifications[sp.getName()] = &sp;
+	}
 
 }
+
 AutoBindFile AutoBindFile::LoadFromXML(std::string filePath) {
 	tinyxml2::XMLDocument document;
 	if (document.LoadFile(filePath.c_str()) != tinyxml2::XML_SUCCESS) {
@@ -179,12 +193,12 @@ AutoBindFile AutoBindFile::LoadFromXML(std::string filePath) {
 		}
 
 		if (elementNameEquals(element, "StructSpec")) {
-			structSpecifications.push_back(parseStructElement(element));
+			const StructSpec &structSpec = parseStructElement(element);
+			structSpecifications.push_back(structSpec);
 		}
 
 		element = element->NextSiblingElement();
 	}
 
 	return AutoBindFile(moduleNameAttribute->Value(), functionSpecifications, structSpecifications);
-
 }

@@ -2,6 +2,7 @@
 #define AUTOBIND_FILE_H
 #include <vector>
 #include <unordered_map>
+#include <memory>
 #include "function-spec.h"
 #include "struct-spec.hpp"
 
@@ -11,6 +12,8 @@ private:
 	const std::vector<FunctionSpec> m_functionSpecifications;
 	const std::vector<StructSpec> m_structSpecifications;
 	const std::string m_moduleName;
+	
+	std::unordered_map<std::string, const StructSpec*> m_mapStructSpecifications;
 
 public:
 	AutoBindFile(
@@ -18,6 +21,10 @@ public:
 		const std::vector<FunctionSpec> &functionSpecifications, 
 		const std::vector<StructSpec> &structSpecifications
 	);
+
+	inline const StructSpec &getStructSpec(const std::string &name) const {
+		return *m_mapStructSpecifications.at(name);
+	}
 
 	inline const std::vector<FunctionSpec> &getFunctionSpecifications() const {
 		return m_functionSpecifications;
