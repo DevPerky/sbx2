@@ -1,4 +1,4 @@
-#include "AB-test-implementation.c"
+#include "AB-test-interface.h"
 #include <lauxlib.h>
 
 static AB_threeInThreeOut AB_threeInThreeOut_binding;
@@ -48,7 +48,7 @@ static int l_threeInThreeOut(lua_State *L) {
 	}
 
 	if (AB_threeInThreeOut_binding) {
-		if (!AB_threeInThreeOut_binding(in_param1, in_param2, in_param3, &out_param, &out_param1, &out_param2) {
+		if (!AB_threeInThreeOut_binding(in_param1, in_param2, in_param3, &out_param, &out_param1, &out_param2)) {
 			return luaL_error(L, "Runtime error: threeInThreeOut failed for unknown reason!");
 		}
 	}
@@ -58,7 +58,7 @@ static int l_threeInThreeOut(lua_State *L) {
 
 	lua_pushnumber(L, out_param);
 	lua_pushstring(L, out_param1);
-	lua_pushuserdata(L, out_param2);
+	lua_pushlightuserdata(L, out_param2);
 
 	return 3;
 }
@@ -92,7 +92,7 @@ static int l_theeInZeroOut(lua_State *L) {
 	}
 
 	if (AB_theeInZeroOut_binding) {
-		if (!AB_theeInZeroOut_binding(out_param, out_param1, out_param2) {
+		if (!AB_theeInZeroOut_binding(out_param, out_param1, out_param2)) {
 			return luaL_error(L, "Runtime error: theeInZeroOut failed for unknown reason!");
 		}
 	}
@@ -112,7 +112,7 @@ static int l_zeroInThreeOut(lua_State *L) {
 	void *out_param2;
 
 	if (AB_zeroInThreeOut_binding) {
-		if (!AB_zeroInThreeOut_binding(, &out_param, &out_param1, &out_param2) {
+		if (!AB_zeroInThreeOut_binding(&out_param, &out_param1, &out_param2)) {
 			return luaL_error(L, "Runtime error: zeroInThreeOut failed for unknown reason!");
 		}
 	}
@@ -122,7 +122,7 @@ static int l_zeroInThreeOut(lua_State *L) {
 
 	lua_pushnumber(L, out_param);
 	lua_pushstring(L, out_param1);
-	lua_pushuserdata(L, out_param2);
+	lua_pushlightuserdata(L, out_param2);
 
 	return 3;
 }
