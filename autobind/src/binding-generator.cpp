@@ -304,10 +304,6 @@ static void writeCustomType(const StructSpec &structSpecification, std::stringst
 	for(const auto &member : structSpecification.getMembers()) {
 		
 		stringStream << "\t";
-		if(member.type == Parameter::Type::Custom && member.typeName == structSpecification.getName()) {
-			stringStream << "struct _";
-		}
-
 		stringStream << generateCParameterInstance(member, false) << ";" << std::endl;
 		
 	}
