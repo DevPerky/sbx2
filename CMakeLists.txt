@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 message(STATUS ${CMAKE_SYSTEM_NAME})
 project(SBX2)
 
+set(CMAKE_BUILD_TYPE Debug)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -11,8 +12,6 @@ cmake_path(CONVERT "../SbxDrawBindings.xml" TO_NATIVE_PATH_LIST SbxDrawBindings)
 
 cmake_path(CONVERT "../src/modules/app" TO_NATIVE_PATH_LIST AppModuleDir)
 cmake_path(CONVERT "../src/modules/draw" TO_NATIVE_PATH_LIST DrawModuleDir)
-
-
 
 add_subdirectory(glfw)
 add_subdirectory(tinyxml2)
@@ -29,7 +28,11 @@ add_executable(sbx
     src/modules/draw/draw.cpp
 )
 
-add_executable(autobind autobind/src/main.cpp autobind/src/autobind-file.cpp autobind/src/binding-generator.cpp)
+add_executable(autobind 
+    autobind/src/main.cpp
+    autobind/src/autobind-file.cpp
+    autobind/src/binding-generator.cpp
+)
 
 target_link_libraries(sbx lua_static)
 target_link_libraries(sbx glfw)
