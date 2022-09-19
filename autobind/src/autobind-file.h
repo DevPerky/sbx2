@@ -26,6 +26,10 @@ public:
 		return *m_mapStructSpecifications.at(name);
 	}
 
+	inline const std::vector<StructSpec> &getStructSpecifications() const {
+		return m_structSpecifications;
+	}
+
 	inline const std::vector<FunctionSpec> &getFunctionSpecifications() const {
 		return m_functionSpecifications;
 	}

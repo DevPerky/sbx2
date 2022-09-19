@@ -50,7 +50,9 @@ static std::string generateCParameterInstance(const Parameter &parameter, bool p
 	std::stringstream stringStream;
 	
 	std::unordered_map<Parameter::Type, std::string> parameterTypeStrings = parameterTypeToCParameterStringMap();
-	const std::string &typeString = parameterTypeStrings.at(parameter.type);
+	
+	const std::string &typeString = (parameter.type == Parameter::Type::Custom) ?
+		parameter.typeName : parameterTypeStrings.at(parameter.type);
 
 	stringStream << typeString;
 
@@ -153,6 +155,17 @@ static void writeFunctionPointerSetterImplementations(const std::vector<Function
 	}
 }
 
+static void writePushCustomParam(const Parameter &param, std::stringstream &stringStream) {
+	
+}
+
+static void writePushValue(const Parameter &param, std::stringstream &stringStream) {
+	std::unordered_map<Parameter::Type, std::string> luaPushValueFunctions;
+	luaPushValueFunctions[Parameter::Type::Number] = "lua_pushnumber";
+	luaPushValueFunctions[Parameter::Type::String] = "lua_pushstring";
+	luaPushValueFunctions[Parameter::Type::UserData] = "lua_pushlightuserdata";
+}
+
 static void writeBindingImplementation(const FunctionSpec &functionSpec, std::stringstream &stringStream) {
 	std::unordered_map<Parameter::Type, std::string> 
 		parameterTypeStrings = parameterTypeToCParameterStringMap();
@@ -164,6 +177,7 @@ static void writeBindingImplementation(const FunctionSpec &functionSpec, std::st
 	parameterCheckTypeFunctions[Parameter::Type::Number] = "lua_isnumber";
 	parameterCheckTypeFunctions[Parameter::Type::String] = "lua_isstring";
 	parameterCheckTypeFunctions[Parameter::Type::UserData] = "lua_isuserdata";
+	parameterCheckTypeFunctions[Parameter::Type::Custom] = "lua_istable";
 
 	std::unordered_map<Parameter::Type, std::string> getParameterValueFunctions;
 	getParameterValueFunctions[Parameter::Type::Number] = "lua_tonumber";
@@ -195,6 +209,12 @@ static void writeBindingImplementation(const FunctionSpec &functionSpec, std::st
 	// Generates code checking the types for the in parameters on the lua stack
 	// as well as retriving them if the type is correct
 	for (int i = inParams.size() - 1; i >= 0; i--) {
+		
+		// TODO: Remove this and fix instead
+		if(inParams[i].type == Parameter::Type::Custom) {
+			continue;
+		}
+
 		int luaIndex = inParams.size() - i;
 
 		// Generates an if-statement checking the type of the parameter
@@ -258,6 +278,7 @@ static void writeBindingImplementation(const FunctionSpec &functionSpec, std::st
 
 	// Generates the code pushing the results 
 	for (auto &param : outParams) {
+		//writePushValue(param, stringStream);
 		const std::string &luaPushValueFunction = luaPushValueFunctions.at(param.type);
 		stringStream << "\t" << luaPushValueFunction << "(L, " << param.name << ");" << std::endl;
 	}
@@ -278,6 +299,30 @@ static void writeBindingImplementations(const std::vector<FunctionSpec> &functio
 	}
 }
 
+static void writeCustomType(const StructSpec &structSpecification, std::stringstream &stringStream) {
+	stringStream << "typedef struct " << structSpecification.getName() << " {" << std::endl;
+	for(const auto &member : structSpecification.getMembers()) {
+		
+		stringStream << "\t";
+		if(member.type == Parameter::Type::Custom && member.typeName == structSpecification.getName()) {
+			stringStream << "struct _";
+		}
+
+		stringStream << generateCParameterInstance(member, false) << ";" << std::endl;
+		
+	}
+	stringStream << "}" << structSpecification.getName() << ";" << std::endl;
+}
+
+static void writeCustomTypes(const std::vector<StructSpec> &structSpecifications, std::stringstream &stringStream) {
+
+	for(const auto &structSpec : structSpecifications) {
+		writeCustomType(structSpec, stringStream);
+		stringStream << std::endl;
+	}
+}
+
+
 static void writeRegisterModuleImplementation(const std::string moduleName, const std::vector<FunctionSpec> &functionSpecs, std::stringstream &stringStream) {
 	stringStream << generateRegisterFunctionsPrototype(moduleName) << " {" << std::endl;
 	
@@ -296,8 +341,12 @@ const std::string BindingGenerator::generateBindingInterface() const {
 	
 	stream << generateRegisterFunctionsPrototype(m_autoBindFile.getModuleName()) << ";" << std::endl;
 	
+	writeCustomTypes(m_autoBindFile.getStructSpecifications(), stream);
+	stream << std::endl;
+	
 	writeFunctionPointerTypes(m_autoBindFile.getFunctionSpecifications(), stream);
 	stream << std::endl;
+
 
 	writeFunctionPointerSetterProtypes(m_autoBindFile.getFunctionSpecifications(), stream);
 	stream << std::endl;
