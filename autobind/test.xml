@@ -1,39 +1,22 @@
 <Bindings module-name="test">
-  <StructSpec name="test">
+  <StructSpec name="Test">
     <Members>
       <Parameter type="number" name="testNumber"/>
       <Parameter type="string" name="testString"/>
       <Parameter type="userdata" name="testUserData"/>
     </Members>
   </StructSpec>
-  <FunctionSpec name="threeInThreeOut">
-    <In>
-        <Parameter type="number" name="in_param1"/>
-        <Parameter type="string" name="in_param2"/>
-        <Parameter type="userdata" name="in_param3"/>
-    </In>
 
-    <Out>
-        <Parameter type="number" name="out_param"/>
-        <Parameter type="string" name="out_param1"/>
-        <Parameter type="userdata" name="out_param2"/>
-    </Out>
-  </FunctionSpec>
+  <StructSpec name="Test2">
+    <Members>
+      <Parameter type="Test" name="customParam"/>
+    </Members>
+  </StructSpec>
 
-  <FunctionSpec name="theeInZeroOut">
+  <FunctionSpec name="customTypeIn">
     <In>
-      <Parameter type="number" name="out_param"/>
-      <Parameter type="string" name="out_param1"/>
-      <Parameter type="userdata" name="out_param2"/>
+      <Parameter type="Test" name="customParam"/>
     </In>
-  </FunctionSpec>
-  
-  <FunctionSpec name="zeroInThreeOut">
-    <Out>
-      <Parameter type="number" name="out_param"/>
-      <Parameter type="string" name="out_param1"/>
-      <Parameter type="userdata" name="out_param2"/>
-    </Out>
   </FunctionSpec>
 
 </Bindings>
