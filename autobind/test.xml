@@ -16,6 +16,7 @@
   <FunctionSpec name="customTypeIn">
     <In>
       <Parameter type="Test" name="customParam"/>
+      <Parameter type="string" name="stringParam"/>
     </In>
   </FunctionSpec>
 
