@@ -37,7 +37,7 @@ void CodeWriter::writeCParameter(const CParameter &parameter) {
     m_stringStream << parameter.getName();
 }	
 
-void CodeWriter::writeFunctionHeader(const CFunctionSpec &functionSpec) {
+void CodeWriter::writeFunctionHeader(const CFunctionSpec &functionSpec, bool isStatic) {
     auto &cTypeStrings = cTypeStringMap();
     auto &indentationString = generateIndentationString();
 
@@ -46,7 +46,7 @@ void CodeWriter::writeFunctionHeader(const CFunctionSpec &functionSpec) {
     
     m_stringStream << indentationString;
 
-    if(functionSpec.isStatic()) {
+    if(isStatic) {
         m_stringStream << "static ";
     }
 
