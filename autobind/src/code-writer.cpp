@@ -41,7 +41,9 @@ void CodeWriter::writeFunctionHeader(const CFunctionSpec &functionSpec) {
     auto &cTypeStrings = cTypeStringMap();
     auto &indentationString = generateIndentationString();
 
-    const std::string &returnTypeString = cTypeStrings.at(functionSpec.getReturnType().cType);
+    const std::string &returnTypeString = (functionSpec.getReturnType().cType != CParameter::Type::CType::Struct) ?
+        cTypeStrings.at(functionSpec.getReturnType().cType) : functionSpec.getReturnType().typeName;
+    
     m_stringStream << indentationString;
 
     if(functionSpec.isStatic()) {
