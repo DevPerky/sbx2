@@ -6,7 +6,7 @@ class CParameter {
 public:
     struct Type {
         enum class CType {
-            Struct,
+            NonPrimitive,
             Int,
             Float,
             Double,
