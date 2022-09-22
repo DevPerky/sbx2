@@ -160,25 +160,36 @@ static void writeFunctionPointerTypes(
 	}
 }
 
-static void writeFunctionPointerSetterProtype(const LuaFunctionSpec &functionSpec, std::stringstream &stringStream) {
-	stringStream << "void AB_bind_" << functionSpec.getName()
-		<< "(" << generateFunctionPointerTypeName(functionSpec.getName())
-		<< " " << functionPointerSetterParameterName << ")";
+static void writeFunctionPointerSetterProtype(const LuaFunctionSpec &functionSpec, CodeWriter &writer) {
 
-}
+	std::vector<CParameter> cParams;
+	cParams.push_back(
+		CParameter(
+			generateFunctionPointerTypeName(functionSpec.getName()),
+			CParameter::Type(
+				CParameter::Type::CType::NonPrimitive,
+				functionPointerSetterParameterName,
+				0
+			)
+		)
+	);
 
-static void writeFunctionPointerSetterProtypes(const std::vector<LuaFunctionSpec> &functionSpecs, std::stringstream &stringStream) {
-	for (auto fs : functionSpecs) {
-		writeFunctionPointerSetterProtype(fs, stringStream);
-		stringStream << ";" << std::endl;
-	}
+	
+	writer.writeFunctionPrototype(
+		CFunctionSpec(
+			std::string("AB_bind_") + functionSpec.getName(),
+			CParameter::Type(CParameter::Type::CType::Void, "", 0),
+			cParams,
+			false
+		)
+	);
 }
 
 static void writeFunctionPointerSetterImplementation(const LuaFunctionSpec &functionSpec, std::stringstream &stringStream) {
 	stringStream << "static " << generateFunctionPointerTypeName(functionSpec.getName()) << " "
 		<< generateFunctionPointerVariableName(functionSpec.getName()) << ";" << std::endl;
 
-	writeFunctionPointerSetterProtype(functionSpec, stringStream);
+	//writeFunctionPointerSetterProtype(functionSpec, stringStream);
 	stringStream << " {" << std::endl;
 	stringStream << "\t" << generateFunctionPointerVariableName(functionSpec.getName()) << " = ";
 	stringStream << functionPointerSetterParameterName << ";" << std::endl;
@@ -409,7 +420,7 @@ static void writeCustomGetters(const std::vector<StructSpec> &structSpecificatio
 const CFunctionSpec BindingGenerator::getRegisterModuleFunction() const {
 	std::vector<CParameter> registerModuleParams;
 	registerModuleParams.push_back(
-		CParameter("L", CParameter::Type(CParameter::Type::CType::Struct, "lua_State", 1))
+		CParameter("L", CParameter::Type(CParameter::Type::CType::NonPrimitive, "lua_State", 1))
 	);
 
 	return CFunctionSpec(
@@ -417,6 +428,28 @@ const CFunctionSpec BindingGenerator::getRegisterModuleFunction() const {
 		CParameter::Type(CParameter::Type::CType::Void, "", 0),
 		registerModuleParams
 	);
+}
+
+const CFunctionSpec BindingGenerator::getFunctionPointerSetter(const LuaFunctionSpec &functionSpec) const{
+	std::vector<CParameter> cParams;
+	cParams.push_back(
+		CParameter(
+			functionPointerSetterParameterName,
+			CParameter::Type(
+				CParameter::Type::CType::NonPrimitive,
+				generateFunctionPointerTypeName(functionSpec.getName()),
+				0
+			)
+		)
+	);
+
+	return CFunctionSpec(
+		std::string("AB_bind_") + functionSpec.getName(),
+		CParameter::Type(CParameter::Type::CType::Void, "", 0),
+		cParams,
+		false
+	);
+
 }
 
 
@@ -430,6 +463,7 @@ const std::string BindingGenerator::generateBindingInterface() const {
 	codeWriter.writeFunctionPrototype(getRegisterModuleFunction());
 	codeWriter.writeNewLine();
 
+
 	//stream << generateRegisterFunctionsPrototype(m_autoBindFile.getModuleName()) << ";" << std::endl;
 	
 	writeCustomTypes(m_autoBindFile.getStructSpecifications(), stream);
@@ -438,10 +472,13 @@ const std::string BindingGenerator::generateBindingInterface() const {
 	writeFunctionPointerTypes(m_autoBindFile.getFunctionSpecifications(), stream);
 	stream << std::endl;
 
-
-	writeFunctionPointerSetterProtypes(m_autoBindFile.getFunctionSpecifications(), stream);
+	for (auto fs : m_autoBindFile.getFunctionSpecifications()) {
+		codeWriter.writeFunctionPrototype(getFunctionPointerSetter(fs));
+		codeWriter.writeNewLine();
+	}
+	/*writeFunctionPointerSetterProtypes(m_autoBindFile.getFunctionSpecifications(), stream);
 	stream << std::endl;
-
+	*/
 	return stream.str();
 }
 
