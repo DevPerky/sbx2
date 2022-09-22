@@ -408,9 +408,25 @@ static void writeCustomGetters(const std::vector<StructSpec> &structSpecificatio
 const std::string BindingGenerator::generateBindingInterface() const {
 	std::stringstream stream;
 
-	stream << "#include <lua.h>" << std::endl;
 	
-	stream << generateRegisterFunctionsPrototype(m_autoBindFile.getModuleName()) << ";" << std::endl;
+	stream << "#include <lua.h>" << std::endl;
+	CodeWriter codeWriter(stream);
+
+	std::vector<CParameter> registerFunctionsParams;
+	registerFunctionsParams.push_back(
+		CParameter("L", CParameter::Type(CParameter::Type::CType::Struct, "lua_State", 1))
+	);
+
+	CFunctionSpec registerFunctionsSpec(
+		(std::string("AB_registerModule_") + m_autoBindFile.getModuleName()),
+		CParameter::Type(CParameter::Type::CType::Void, "", 0),
+		registerFunctionsParams
+	);
+
+	codeWriter.writeFunctionPrototype(registerFunctionsSpec);
+	codeWriter.writeNewLine();
+
+	//stream << generateRegisterFunctionsPrototype(m_autoBindFile.getModuleName()) << ";" << std::endl;
 	
 	writeCustomTypes(m_autoBindFile.getStructSpecifications(), stream);
 	stream << std::endl;

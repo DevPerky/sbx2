@@ -3,6 +3,8 @@
 #include <vector>
 #include "lua-function-spec.hpp"
 #include "autobind-file.hpp"
+#include "code-writer.hpp"
+
 #include <string>
 
 class BindingGenerator {
