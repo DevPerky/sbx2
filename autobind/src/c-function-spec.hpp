@@ -10,18 +10,13 @@ private:
     const CParameter::Type m_returnType;
     const std::vector<CParameter> m_inputParams;
     const bool m_isStatic;
-    std::unordered_map<std::string, const CParameter*> m_inputParamMap;
 
 public:
     inline CFunctionSpec(const std::string &name,
         const CParameter::Type &returnType,
         const std::vector<CParameter> &inputParams,
         bool isStatic = false
-    ) : m_name(name), m_returnType(returnType), m_inputParams(inputParams), m_isStatic(isStatic) {
-        for(auto &param : inputParams) {
-            m_inputParamMap[param.getName()] = &param;
-        }
-    }
+    ) : m_name(name), m_returnType(returnType), m_inputParams(inputParams), m_isStatic(isStatic) {}
     
     inline const std::string &getName() const {
         return m_name;
@@ -33,10 +28,6 @@ public:
 
     inline const std::vector<CParameter> &getInputParams() const {
         return m_inputParams;
-    }
-
-    inline const CParameter &getParameter(const std::string &name) const {
-        return *m_inputParamMap.at(name);
     }
 
     inline const bool isStatic() const {
