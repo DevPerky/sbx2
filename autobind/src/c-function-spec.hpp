@@ -12,8 +12,11 @@ private:
     const bool m_isStatic;
 
 public:
-    inline CFunctionSpec(const std::string &name, const CParameter::Type &returnType, const std::vector<CParameter> &inputParams, bool isStatic = false)
-        : m_name(name), m_returnType(returnType), m_inputParams(inputParams), m_isStatic(isStatic) {}
+    inline CFunctionSpec(const std::string &name,
+        const CParameter::Type &returnType,
+        const std::vector<CParameter> &inputParams,
+        bool isStatic = false
+    ) : m_name(name), m_returnType(returnType), m_inputParams(inputParams), m_isStatic(isStatic) {}
     
     inline const std::string &getName() const {
         return m_name;
