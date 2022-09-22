@@ -10,6 +10,8 @@ private:
     int m_indentationLevel = 0;
 
     void writeFunctionHeader(const CFunctionSpec &functionSpec, bool isStatic = false);
+    void writeParameterList(const std::vector<CParameter> &parameters);
+
     const std::string generateIndentationString() const;
 
 public:
@@ -19,6 +21,7 @@ public:
 
     void writeFunctionPrototype(const CFunctionSpec &functionSpec);
     void writeFunctionImplementation(const CFunctionSpec &functionSpec, std::function<void()> writeContents);
+    void writeFunctionPointerTypeDef(const CFunctionSpec &functionSpec);
     void writeCParameter(const CParameter &parameter, bool isStatic = false);
     void writeVariableInstance(const CParameter &parameter, bool isStatic = false);
     void writeVariableAssignment(const std::string &variableName, const std::string &value);

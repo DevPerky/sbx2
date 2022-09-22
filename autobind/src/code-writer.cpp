@@ -64,14 +64,17 @@ void CodeWriter::writeFunctionHeader(const CFunctionSpec &functionSpec, bool isS
     m_stringStream << returnTypeString << " ";
     m_stringStream << functionSpec.getName();
     m_stringStream << "(";
-    for(auto &parameter : functionSpec.getInputParams()) {
+    writeParameterList(functionSpec.getInputParams());
+    m_stringStream << ")";
+}
+
+void CodeWriter::writeParameterList(const std::vector<CParameter> &parameters) {
+    for(auto &parameter : parameters) {
         writeCParameter(parameter);
-        if(&parameter != &functionSpec.getInputParams().back()) {
+        if(&parameter != &parameters.back()) {
             m_stringStream << ", ";
         }
     }
-
-    m_stringStream << ")";
 }
 
 void CodeWriter::writeFunctionCall(const CFunctionSpec &functionSpec, const std::vector<std::string> &args) {
@@ -102,6 +105,21 @@ void CodeWriter::writeFunctionImplementation(const CFunctionSpec &functionSpec, 
     m_indentationLevel = startIndentation;
     writeNewLine();
     m_stringStream << "}";
+}
+
+void CodeWriter::writeFunctionPointerTypeDef(const CFunctionSpec &functionSpec) {
+    m_stringStream << "typedef ";
+
+    if(functionSpec.getReturnType().cType == CParameter::Type::CType::NonPrimitive) {
+        m_stringStream << functionSpec.getReturnType().typeName;
+    }
+    else {
+        m_stringStream << cTypeStringMap().at(functionSpec.getReturnType().cType);
+    }
+    
+    m_stringStream << " (*" << functionSpec.getName() << ")(";
+    writeParameterList(functionSpec.getInputParams());
+    m_stringStream << ");";
 }
 
 void CodeWriter::writeVariableAssignment(const std::string &variableName, const std::string &value) {
