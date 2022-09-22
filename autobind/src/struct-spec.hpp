@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "parameter.hpp"
+#include "lua-parameter.hpp"
 
 class StructSpec {
 private:

@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include "parameter.hpp"
+#include "lua-parameter.hpp"
 
 class FunctionSpec {
 
