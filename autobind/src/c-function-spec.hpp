@@ -35,6 +35,10 @@ public:
         return m_inputParams;
     }
 
+    inline const CParameter &getParameter(const std::string &name) const {
+        return *m_inputParamMap.at(name);
+    }
+
     inline const bool isStatic() const {
         return m_isStatic;
     }
