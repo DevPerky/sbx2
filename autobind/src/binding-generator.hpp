@@ -12,8 +12,10 @@ private:
     const AutoBindFile &m_autoBindFile;
 
 	const CFunctionSpec getRegisterModuleFunction() const;
+	const CFunctionSpec getFunctionPointerSetter(const LuaFunctionSpec &functionSpec) const;
+	
 public:
-    inline BindingGenerator::BindingGenerator(const AutoBindFile &autoBindFile) 
+    inline BindingGenerator(const AutoBindFile &autoBindFile) 
 		: m_autoBindFile(autoBindFile) {}
 
     const std::string generateBindingInterface() const;
