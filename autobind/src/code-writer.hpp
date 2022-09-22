@@ -15,7 +15,7 @@ public:
     inline CodeWriter(std::stringstream &stringStream)
         : m_stringStream(stringStream) {}
 
-    void writeFunctionProtoType(const CFunctionSpec &functionSpec);
+    void writeFunctionPrototype(const CFunctionSpec &functionSpec);
     void writeCParameter(const CParameter &parameter);
     void writeNewLine();
     

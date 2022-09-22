@@ -16,6 +16,7 @@ static const std::unordered_map<CParameter::Type::CType, std::string> cTypeStrin
 const std::string CodeWriter::generateIndentationString() const {
     std::string indentationString;
     indentationString.resize(m_indentationLevel, '\t');
+    return indentationString;
 }
 
 void CodeWriter::writeCParameter(const CParameter &parameter) {
@@ -60,7 +61,7 @@ void CodeWriter::writeFunctionHeader(const CFunctionSpec &functionSpec) {
     m_stringStream << ")";
 }
 
-void CodeWriter::writeFunctionProtoType(const CFunctionSpec &functionSpec) {
+void CodeWriter::writeFunctionPrototype(const CFunctionSpec &functionSpec) {
     writeFunctionHeader(functionSpec);
     m_stringStream << ";";
 }
