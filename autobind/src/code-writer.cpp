@@ -59,3 +59,12 @@ void CodeWriter::writeFunctionHeader(const CFunctionSpec &functionSpec) {
 
     m_stringStream << ")";
 }
+
+void CodeWriter::writeFunctionProtoType(const CFunctionSpec &functionSpec) {
+    writeFunctionHeader(functionSpec);
+    m_stringStream << ";";
+}
+
+void CodeWriter::writeNewLine() {
+    m_stringStream << std::endl;
+}

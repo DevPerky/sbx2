@@ -17,6 +17,7 @@ public:
 
     void writeFunctionProtoType(const CFunctionSpec &functionSpec);
     void writeCParameter(const CParameter &parameter);
+    void writeNewLine();
     
     inline void setIndentationLevel(int indentationLevel) {
         m_indentationLevel = indentationLevel;
