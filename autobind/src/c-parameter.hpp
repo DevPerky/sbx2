@@ -4,24 +4,29 @@
 
 class CParameter {
 public:
-    enum class Type {
-        Struct,
-        Int,
-        Float,
-        Double,
-        Void
+    struct Type {
+        enum class CType {
+            Struct,
+            Int,
+            Float,
+            Double,
+            Void
+        }const cType;
+        const std::string typeName;
+        const unsigned int pointerLevels;
+
+        inline Type(CType cType, const std::string &typeName, const unsigned int pointerLevels)
+            : cType(cType), typeName(typeName), pointerLevels(pointerLevels) {}
     };
 
 private:
     const Type m_type;
-    const std::string m_typeName;
     const std::string m_name;
-    const unsigned int m_pointerLevels;
 
 
 public:  
-    inline CParameter(const std::string &name, Type type, unsigned int pointerLevels = 0, const std::string &typeName = nullptr)
-        : m_name(name), m_type(type), m_typeName(typeName), m_pointerLevels(pointerLevels) {}
+    inline CParameter(const std::string &name, Type type)
+        : m_name(name), m_type(type){}
 };
 
 

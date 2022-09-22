@@ -25,8 +25,6 @@ public:
     inline const std::vector<CParameter> &getInputParams() const {
         return m_inputParams;
     }
-    
-    
 
 };
 
