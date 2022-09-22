@@ -23,10 +23,17 @@ private:
     const Type m_type;
     const std::string m_name;
 
-
 public:  
     inline CParameter(const std::string &name, Type type)
         : m_name(name), m_type(type){}
+
+    inline const Type getType() const {
+        return m_type;
+    }
+
+    inline const std::string getName() const {
+        return m_name;
+    }
 };
 
 
