@@ -143,7 +143,7 @@ inline static const std::string generateIndentation(int indentation) {
 }
 
 static void writeFunctionPointerTypes(
-	const std::vector<FunctionSpec> &functionSpecs,
+	const std::vector<LuaFunctionSpec> &functionSpecs,
 	std::stringstream &stringStream) {
 	
 	for (auto &fs : functionSpecs) {
@@ -160,21 +160,21 @@ static void writeFunctionPointerTypes(
 	}
 }
 
-static void writeFunctionPointerSetterProtype(const FunctionSpec &functionSpec, std::stringstream &stringStream) {
+static void writeFunctionPointerSetterProtype(const LuaFunctionSpec &functionSpec, std::stringstream &stringStream) {
 	stringStream << "void AB_bind_" << functionSpec.getName()
 		<< "(" << generateFunctionPointerTypeName(functionSpec.getName())
 		<< " " << functionPointerSetterParameterName << ")";
 
 }
 
-static void writeFunctionPointerSetterProtypes(const std::vector<FunctionSpec> &functionSpecs, std::stringstream &stringStream) {
+static void writeFunctionPointerSetterProtypes(const std::vector<LuaFunctionSpec> &functionSpecs, std::stringstream &stringStream) {
 	for (auto fs : functionSpecs) {
 		writeFunctionPointerSetterProtype(fs, stringStream);
 		stringStream << ";" << std::endl;
 	}
 }
 
-static void writeFunctionPointerSetterImplementation(const FunctionSpec &functionSpec, std::stringstream &stringStream) {
+static void writeFunctionPointerSetterImplementation(const LuaFunctionSpec &functionSpec, std::stringstream &stringStream) {
 	stringStream << "static " << generateFunctionPointerTypeName(functionSpec.getName()) << " "
 		<< generateFunctionPointerVariableName(functionSpec.getName()) << ";" << std::endl;
 
@@ -186,7 +186,7 @@ static void writeFunctionPointerSetterImplementation(const FunctionSpec &functio
 
 }
 
-static void writeFunctionPointerSetterImplementations(const std::vector<FunctionSpec> &functionSpecs, std::stringstream &stringStream) {
+static void writeFunctionPointerSetterImplementations(const std::vector<LuaFunctionSpec> &functionSpecs, std::stringstream &stringStream) {
 	for (auto fs : functionSpecs) {
 
 		writeFunctionPointerSetterImplementation(fs, stringStream);
@@ -210,7 +210,7 @@ static void writeIfTypeCorrectGet(const Parameter &param, int stackIndex, std::s
 	stringStream << indentation << "}" << std::endl;
 }
 
-static void writeBindingImplementation(const FunctionSpec &functionSpec, std::stringstream &stringStream) {
+static void writeBindingImplementation(const LuaFunctionSpec &functionSpec, std::stringstream &stringStream) {
 	std::unordered_map<Parameter::Type, std::string> 
 		parameterTypeStrings = parameterTypeToCParameterStringMap();
 
@@ -321,7 +321,7 @@ static void writeBindingImplementation(const FunctionSpec &functionSpec, std::st
 	stringStream << "}" << std::endl;
 }
 
-static void writeBindingImplementations(const std::vector<FunctionSpec> &functionSpecs, std::stringstream &stringStream) {
+static void writeBindingImplementations(const std::vector<LuaFunctionSpec> &functionSpecs, std::stringstream &stringStream) {
 	for (auto &fs : functionSpecs) {
 		writeBindingImplementation(fs, stringStream);
 		stringStream << std::endl;
@@ -351,7 +351,7 @@ static void writeCustomTypes(const std::vector<StructSpec> &structSpecifications
 }
 
 
-static void writeRegisterModuleImplementation(const std::string moduleName, const std::vector<FunctionSpec> &functionSpecs, std::stringstream &stringStream) {
+static void writeRegisterModuleImplementation(const std::string moduleName, const std::vector<LuaFunctionSpec> &functionSpecs, std::stringstream &stringStream) {
 	stringStream << generateRegisterFunctionsPrototype(moduleName) << " {" << std::endl;
 	
 	for (auto fs : functionSpecs) {

@@ -5,7 +5,7 @@
 #include <string>
 #include "lua-parameter.hpp"
 
-class FunctionSpec {
+class LuaFunctionSpec {
 
 public:
 	inline const std::string& getName() const {
@@ -20,7 +20,7 @@ public:
 		return m_parametersOut;
 	}
 
-	FunctionSpec(const std::string name,
+	LuaFunctionSpec(const std::string name,
 		std::vector<Parameter> parametersIn,
 		std::vector<Parameter> parametersOut)
 		: m_name(name), m_parametersIn(parametersIn), m_parametersOut(parametersOut) {}

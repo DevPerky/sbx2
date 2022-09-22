@@ -9,7 +9,7 @@
 class AutoBindFile {
 
 private:
-	const std::vector<FunctionSpec> m_functionSpecifications;
+	const std::vector<LuaFunctionSpec> m_functionSpecifications;
 	const std::vector<StructSpec> m_structSpecifications;
 	const std::string m_moduleName;
 	
@@ -18,7 +18,7 @@ private:
 public:
 	AutoBindFile(
 		std::string moduleName, 
-		const std::vector<FunctionSpec> &functionSpecifications, 
+		const std::vector<LuaFunctionSpec> &functionSpecifications, 
 		const std::vector<StructSpec> &structSpecifications
 	);
 
@@ -30,7 +30,7 @@ public:
 		return m_structSpecifications;
 	}
 
-	inline const std::vector<FunctionSpec> &getFunctionSpecifications() const {
+	inline const std::vector<LuaFunctionSpec> &getFunctionSpecifications() const {
 		return m_functionSpecifications;
 	}
 

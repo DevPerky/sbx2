@@ -58,7 +58,7 @@ static std::vector<Parameter> parseParameterElements(const tinyxml2::XMLElement 
 	return parameters;
 }
 
-static FunctionSpec parseFunctionElement(const tinyxml2::XMLElement *functionElement) {
+static LuaFunctionSpec parseFunctionElement(const tinyxml2::XMLElement *functionElement) {
 	if (!elementNameEquals(functionElement, "FunctionSpec")) {
 		throw "Wrong kind of element passed to function";
 	}
@@ -108,7 +108,7 @@ static FunctionSpec parseFunctionElement(const tinyxml2::XMLElement *functionEle
 		throw "Two parameters can't have the same name!";
 	}
 
-	return FunctionSpec(name, parametersIn, parametersOut);
+	return LuaFunctionSpec(name, parametersIn, parametersOut);
 }
 
 static StructSpec parseStructElement(const tinyxml2::XMLElement *structElement) {
@@ -151,7 +151,7 @@ static StructSpec parseStructElement(const tinyxml2::XMLElement *structElement) 
 
 AutoBindFile::AutoBindFile(
 	std::string moduleName, 
-	const std::vector<FunctionSpec> &functionSpecifications, 
+	const std::vector<LuaFunctionSpec> &functionSpecifications, 
 	const std::vector<StructSpec> &structSpecifications
 ) : m_moduleName(moduleName),
 		m_functionSpecifications(functionSpecifications),
@@ -185,7 +185,7 @@ AutoBindFile AutoBindFile::LoadFromXML(std::string filePath) {
 	}
 
 	element = element->FirstChildElement();
-	std::vector<FunctionSpec> functionSpecifications;
+	std::vector<LuaFunctionSpec> functionSpecifications;
 	std::vector<StructSpec> structSpecifications;
 	while(element) {
 		if (elementNameEquals(element, "FunctionSpec")) {
