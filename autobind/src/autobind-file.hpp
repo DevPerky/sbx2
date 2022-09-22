@@ -3,7 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
-#include "lua-function-spec.h"
+#include "lua-function-spec.hpp"
 #include "struct-spec.hpp"
 
 class AutoBindFile {
