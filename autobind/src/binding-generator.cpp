@@ -22,8 +22,29 @@ static std::unordered_map<Parameter::Type, std::string> parameterTypeToLuaParame
 	parameterTypeStrings[Parameter::Type::Number] = "number";
 	parameterTypeStrings[Parameter::Type::String] = "string";
 	parameterTypeStrings[Parameter::Type::UserData] = "userdata";
+	parameterTypeStrings[Parameter::Type::Custom] = "table";
+	
 
 	return parameterTypeStrings;
+}
+
+static const std::unordered_map<Parameter::Type, std::string> getParameterTypeCheckFunctions() {
+	std::unordered_map<Parameter::Type, std::string> parameterCheckTypeFunctions;
+	parameterCheckTypeFunctions[Parameter::Type::Number] = "lua_isnumber";
+	parameterCheckTypeFunctions[Parameter::Type::String] = "lua_isstring";
+	parameterCheckTypeFunctions[Parameter::Type::UserData] = "lua_isuserdata";
+	parameterCheckTypeFunctions[Parameter::Type::Custom] = "lua_istable";
+
+	return parameterCheckTypeFunctions;
+}
+
+static std::unordered_map<Parameter::Type, std::string> getParameterValueFunctions() {
+	std::unordered_map<Parameter::Type, std::string> parameterValueFunctions;
+	parameterValueFunctions[Parameter::Type::String] = "lua_tostring";
+	parameterValueFunctions[Parameter::Type::Number] = "lua_tonumber";
+	parameterValueFunctions[Parameter::Type::UserData] = "lua_touserdata";
+
+	return parameterValueFunctions;
 }
 
 static std::string generateCParameter(const Parameter &parameter, bool out) {
@@ -44,7 +65,9 @@ static std::string generateCParameter(const Parameter &parameter, bool out) {
 	stringStream << parameter.name;
 
 	stringStream << typeString;
-}
+
+	return stringStream.str();
+}	
 
 static std::string generateCParameterInstance(const Parameter &parameter, bool pointer) {
 	std::stringstream stringStream;
@@ -103,6 +126,22 @@ inline static const std::string generateBindingFunctionPrototype(const std::stri
 	return "int " + generateBindingFunctionName(functionName) + "(lua_State *L)";
 }
 
+inline static const std::string generateCustomGetterFunctionName(const std::string &typeName) {
+	return "AB_to" + typeName;
+}
+
+inline static const std::string generateCustomGetterFunctionPrototype(const std::string &typeName) {
+	return "int " + generateCustomGetterFunctionName(typeName) + "(lua_State *L, int index, " + typeName + " *to)";
+}
+
+inline static const std::string generateIndentation(int indentation) {
+	std::string indentationString;
+	for(int i = 0; i < indentation; i++) {
+		indentationString += "\t";
+	}
+	return indentationString;
+}
+
 static void writeFunctionPointerTypes(
 	const std::vector<FunctionSpec> &functionSpecs,
 	std::stringstream &stringStream) {
@@ -155,15 +194,20 @@ static void writeFunctionPointerSetterImplementations(const std::vector<Function
 	}
 }
 
-static void writePushCustomParam(const Parameter &param, std::stringstream &stringStream) {
-	
-}
+static void writeIfTypeCorrectGet(const Parameter &param, int stackIndex, std::stringstream &stringStream, int indentationLevel) {
+	std::unordered_map<Parameter::Type, std::string> parameterCheckTypeFunctions = getParameterTypeCheckFunctions();
+	std::unordered_map<Parameter::Type, std::string> parameterValueFunctions = getParameterValueFunctions();
+	std::unordered_map<Parameter::Type, std::string> luaParameterTypes = parameterTypeToLuaParameterStringMap();
+	std::string indentation = generateIndentation(indentationLevel);
+	// Generates an if-statement checking the type of the parameter
+	stringStream << indentation << "if (" << parameterCheckTypeFunctions.at(param.type) << "(L, "
+		<< stackIndex << ")) {" << std::endl;
 
-static void writePushValue(const Parameter &param, std::stringstream &stringStream) {
-	std::unordered_map<Parameter::Type, std::string> luaPushValueFunctions;
-	luaPushValueFunctions[Parameter::Type::Number] = "lua_pushnumber";
-	luaPushValueFunctions[Parameter::Type::String] = "lua_pushstring";
-	luaPushValueFunctions[Parameter::Type::UserData] = "lua_pushlightuserdata";
+	// Generates the code retrieving the parameter from the lua stack
+	stringStream << indentation << "\t" << param.name << " = " << parameterValueFunctions.at(param.type)
+		<< "(L, " << stackIndex << ");" << std::endl;
+	
+	stringStream << indentation << "}" << std::endl;
 }
 
 static void writeBindingImplementation(const FunctionSpec &functionSpec, std::stringstream &stringStream) {
@@ -173,16 +217,8 @@ static void writeBindingImplementation(const FunctionSpec &functionSpec, std::st
 	std::unordered_map<Parameter::Type, std::string>
 		luaParameterTypes = parameterTypeToLuaParameterStringMap();
 
-	std::unordered_map<Parameter::Type, std::string> parameterCheckTypeFunctions;
-	parameterCheckTypeFunctions[Parameter::Type::Number] = "lua_isnumber";
-	parameterCheckTypeFunctions[Parameter::Type::String] = "lua_isstring";
-	parameterCheckTypeFunctions[Parameter::Type::UserData] = "lua_isuserdata";
-	parameterCheckTypeFunctions[Parameter::Type::Custom] = "lua_istable";
-
-	std::unordered_map<Parameter::Type, std::string> getParameterValueFunctions;
-	getParameterValueFunctions[Parameter::Type::Number] = "lua_tonumber";
-	getParameterValueFunctions[Parameter::Type::String] = "lua_tostring";
-	getParameterValueFunctions[Parameter::Type::UserData] = "lua_touserdata";
+	std::unordered_map<Parameter::Type, std::string> parameterCheckTypeFunctions = getParameterTypeCheckFunctions();
+	std::unordered_map<Parameter::Type, std::string> parameterValueFunctions = getParameterValueFunctions();
 
 	std::unordered_map<Parameter::Type, std::string> luaPushValueFunctions;
 	luaPushValueFunctions[Parameter::Type::Number] = "lua_pushnumber";
@@ -211,27 +247,24 @@ static void writeBindingImplementation(const FunctionSpec &functionSpec, std::st
 	for (int i = inParams.size() - 1; i >= 0; i--) {
 		
 		// TODO: Remove this and fix instead
+
+
+		int luaIndex = -(inParams.size() - i);
 		if(inParams[i].type == Parameter::Type::Custom) {
-			continue;
+			stringStream << "\t" << "if(lua_istable(L, " << luaIndex << ")) {" << std::endl;
+			stringStream << "\t\t" << "if(!" << generateCustomGetterFunctionName(inParams[i].typeName) << "(L, " << luaIndex << ", &" << inParams[i].name << ")) {" << std::endl;
+			stringStream << "\t\t\t" << "return luaL_error(L, \"Error loading custom type " << inParams[i].typeName << "\");" << std::endl;
+			stringStream << "\t\t" << "}" << std::endl;
+			stringStream << "\t" << "}" << std::endl;
 		}
-
-		int luaIndex = inParams.size() - i;
-
-		// Generates an if-statement checking the type of the parameter
-		stringStream << "\t" << "if (" << parameterCheckTypeFunctions.at(inParams[i].type) << "(L, -"
-			<< luaIndex << ")) {" << std::endl;
-
-		// Generates the code retrieving the parameter from the lua stack
-		stringStream << "\t\t" << inParams[i].name << " = " << getParameterValueFunctions.at(inParams[i].type)
-			<< "(L, -" << luaIndex << ");" << std::endl;
-		
-		stringStream << "\t" << "}" << std::endl;
-
+		else {
+			writeIfTypeCorrectGet(inParams[i], luaIndex, stringStream, 1);
+		}
 		// Generates the code that determines what happens if a parameter of an incorrect
 		// type was passed to the runtime.
 		stringStream << "\t" << "else {" << std::endl;
-		stringStream << "\t\t" << "return luaL_error(L, \"Incorrect type for parameter " <<
-			inParams[i].name << ". Expected type was " << luaParameterTypes.at(inParams[i].type) << ".\");" << std::endl;
+		stringStream << "\t" << "\t" << "return luaL_error(L, \"Incorrect type for parameter " <<
+		inParams[i].name << ". Expected type was " << luaParameterTypes.at(inParams[i].type) << ".\");" << std::endl;
 
 		stringStream << "\t" << "}" << std::endl << std::endl;
 	}
@@ -278,7 +311,6 @@ static void writeBindingImplementation(const FunctionSpec &functionSpec, std::st
 
 	// Generates the code pushing the results 
 	for (auto &param : outParams) {
-		//writePushValue(param, stringStream);
 		const std::string &luaPushValueFunction = luaPushValueFunctions.at(param.type);
 		stringStream << "\t" << luaPushValueFunction << "(L, " << param.name << ");" << std::endl;
 	}
@@ -329,6 +361,49 @@ static void writeRegisterModuleImplementation(const std::string moduleName, cons
 	stringStream << "}" << std::endl;
 }
 
+static void writeCustomGetters(const std::vector<StructSpec> &structSpecifications, std::stringstream &stringStream) {
+	const std::unordered_map<Parameter::Type, std::string> &parameterTypeCheckFunctions = getParameterTypeCheckFunctions();
+	const std::unordered_map<Parameter::Type, std::string> &parameterValueFunctions = getParameterValueFunctions();
+
+	for(auto &structSpec : structSpecifications) {
+		stringStream << generateCustomGetterFunctionPrototype(structSpec.getName()) << ";" << std::endl; 
+	}
+
+	stringStream << std::endl;
+	for(auto &structSpec : structSpecifications) {
+
+		stringStream << generateCustomGetterFunctionPrototype(structSpec.getName()) << " {" << std::endl;
+		for (auto &member : structSpec.getMembers()) {
+			stringStream << '\t' << generateCParameterInstance(member, false) << ';' << std::endl;
+		}
+
+		for(auto &member : structSpec.getMembers()) {
+			stringStream << "\tlua_getfield(L, index, " << "\"" << member.name << "\");" << std::endl;
+			
+			if(member.type == Parameter::Type::Custom) {
+				stringStream << "\t" << "if (!" << generateCustomGetterFunctionName(member.typeName) << "(L, 1, &" << member.name << ")) {" << std::endl;
+				stringStream << "\t\t" << "lua_pop(L, 1);" << std::endl;
+				stringStream << "\t\t" << "return 0;" << std::endl;
+				stringStream << "\t" << "}" << std::endl;
+			}
+			else {
+				writeIfTypeCorrectGet(member, 1, stringStream, 1);
+				stringStream << "\t" << "else {" << std::endl;
+				stringStream << "\t\t" << "lua_pop(L, 1);" << std::endl;
+				stringStream << "\t\t" << "return 0;" << std::endl;
+				stringStream << "\t" << "}" << std::endl;
+			}
+			stringStream << "\t" << "to->" << member.name << " = " << member.name << ";" << std::endl;
+			stringStream << "\t" << "lua_pop(L, 1);" << std::endl;
+			stringStream << std::endl;
+		}
+		stringStream << std::endl;
+
+		stringStream << "\treturn 1;" << std::endl;
+		stringStream << "}" << std::endl << std::endl;
+	}
+}
+
 
 const std::string BindingGenerator::generateBindingInterface() const {
 	std::stringstream stream;
@@ -355,6 +430,8 @@ const std::string BindingGenerator::generateBindingImplementation() const {
 
 	stream << "#include \"" << getInterfaceFileName() << "\"" << std::endl;
 	stream << "#include <lauxlib.h>" << std::endl;
+	stream << std::endl;
+	writeCustomGetters(m_autoBindFile.getStructSpecifications(), stream);
 	stream << std::endl;
 	writeFunctionPointerSetterImplementations(m_autoBindFile.getFunctionSpecifications(), stream);
 	stream << std::endl;
