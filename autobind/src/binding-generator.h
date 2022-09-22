@@ -1,7 +1,7 @@
 #ifndef BINDING_GENERATOR_H
 #define BINDING_GENERATOR_H
 #include <vector>
-#include "function-spec.h"
+#include "lua-function-spec.h"
 #include "autobind-file.h"
 #include <string>
 
