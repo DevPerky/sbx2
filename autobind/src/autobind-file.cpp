@@ -35,7 +35,7 @@ static Parameter parseParameterElement(const tinyxml2::XMLElement *parameterElem
 	const std::string &typeValue = typeAttribute->Value();
 
 	if(parameterTypes.count(typeValue) == 0) {
-		type = Parameter::Type::Custom;
+		type = Parameter::Type::Table;
 	}
 	else {
 		type = parameterTypes[typeValue];

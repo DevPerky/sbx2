@@ -9,7 +9,7 @@ class Parameter {
 			Number,
 			String,
 			UserData,
-			Custom
+			Table
 		};
 
 		std::string name;

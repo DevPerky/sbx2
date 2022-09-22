@@ -22,7 +22,7 @@ static std::unordered_map<Parameter::Type, std::string> parameterTypeToLuaParame
 	parameterTypeStrings[Parameter::Type::Number] = "number";
 	parameterTypeStrings[Parameter::Type::String] = "string";
 	parameterTypeStrings[Parameter::Type::UserData] = "userdata";
-	parameterTypeStrings[Parameter::Type::Custom] = "table";
+	parameterTypeStrings[Parameter::Type::Table] = "table";
 	
 
 	return parameterTypeStrings;
@@ -33,7 +33,7 @@ static const std::unordered_map<Parameter::Type, std::string> getParameterTypeCh
 	parameterCheckTypeFunctions[Parameter::Type::Number] = "lua_isnumber";
 	parameterCheckTypeFunctions[Parameter::Type::String] = "lua_isstring";
 	parameterCheckTypeFunctions[Parameter::Type::UserData] = "lua_isuserdata";
-	parameterCheckTypeFunctions[Parameter::Type::Custom] = "lua_istable";
+	parameterCheckTypeFunctions[Parameter::Type::Table] = "lua_istable";
 
 	return parameterCheckTypeFunctions;
 }
@@ -74,7 +74,7 @@ static std::string generateCParameterInstance(const Parameter &parameter, bool p
 	
 	std::unordered_map<Parameter::Type, std::string> parameterTypeStrings = parameterTypeToCParameterStringMap();
 	
-	const std::string &typeString = (parameter.type == Parameter::Type::Custom) ?
+	const std::string &typeString = (parameter.type == Parameter::Type::Table) ?
 		parameter.typeName : parameterTypeStrings.at(parameter.type);
 
 	stringStream << typeString;
@@ -250,7 +250,7 @@ static void writeBindingImplementation(const FunctionSpec &functionSpec, std::st
 
 
 		int luaIndex = -(inParams.size() - i);
-		if(inParams[i].type == Parameter::Type::Custom) {
+		if(inParams[i].type == Parameter::Type::Table) {
 			stringStream << "\t" << "if(lua_istable(L, " << luaIndex << ")) {" << std::endl;
 			stringStream << "\t\t" << "if(!" << generateCustomGetterFunctionName(inParams[i].typeName) << "(L, " << luaIndex << ", &" << inParams[i].name << ")) {" << std::endl;
 			stringStream << "\t\t\t" << "return luaL_error(L, \"Error loading custom type " << inParams[i].typeName << "\");" << std::endl;
@@ -380,7 +380,7 @@ static void writeCustomGetters(const std::vector<StructSpec> &structSpecificatio
 		for(auto &member : structSpec.getMembers()) {
 			stringStream << "\tlua_getfield(L, index, " << "\"" << member.name << "\");" << std::endl;
 			
-			if(member.type == Parameter::Type::Custom) {
+			if(member.type == Parameter::Type::Table) {
 				stringStream << "\t" << "if (!" << generateCustomGetterFunctionName(member.typeName) << "(L, 1, &" << member.name << ")) {" << std::endl;
 				stringStream << "\t\t" << "lua_pop(L, 1);" << std::endl;
 				stringStream << "\t\t" << "return 0;" << std::endl;
