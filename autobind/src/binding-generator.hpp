@@ -14,6 +14,10 @@ private:
 	const CFunctionSpec getRegisterModuleFunction() const;
 	const CFunctionSpec getFunctionPointerSetterFunction(const LuaFunctionSpec &functionSpec) const;
 	const CFunctionSpec getLuaRegisterFunction() const;
+	const CFunctionSpec getBindingCallBackFunction(const LuaFunctionSpec &functionSpec) const;
+	
+	const CParameter::Type getCParameterTypeTranslation(const LuaParameter &param, bool out) const;
+	
 	
 public:
     inline BindingGenerator(const AutoBindFile &autoBindFile) 

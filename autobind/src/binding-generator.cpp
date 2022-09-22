@@ -318,16 +318,6 @@ static void writeCustomTypes(const std::vector<StructSpec> &structSpecifications
 }
 
 
-static void writeRegisterModuleImplementation(const std::string moduleName, const std::vector<LuaFunctionSpec> &functionSpecs, std::stringstream &stringStream) {
-	stringStream << generateRegisterFunctionsPrototype(moduleName) << " {" << std::endl;
-	
-	for (auto fs : functionSpecs) {
-		stringStream << "\t" << "lua_register(L, \"" << fs.getName() << "\", " << generateBindingFunctionName(fs.getName()) << ");" << std::endl;
-	}
-	
-	stringStream << "}" << std::endl;
-}
-
 static void writeCustomGetters(const std::vector<StructSpec> &structSpecifications, std::stringstream &stringStream) {
 	const std::unordered_map<LuaParameter::Type, std::string> &parameterTypeCheckFunctions = getParameterTypeCheckFunctions();
 	const std::unordered_map<LuaParameter::Type, std::string> &parameterValueFunctions = getParameterValueFunctions();
@@ -439,7 +429,59 @@ const CFunctionSpec BindingGenerator::getLuaRegisterFunction() const {
 	);
 }
 
+const CParameter::Type BindingGenerator::getCParameterTypeTranslation(const LuaParameter &param, bool out) const {
+	CParameter::Type::CType cType;
+	int pointerLevels = out ? 1 : 0;
+	std::string typeName = "";
 
+	switch(param.type) {
+		case LuaParameter::Type::Number:
+			cType = CParameter::Type::CType::Double;
+		break;
+
+		case LuaParameter::Type::String:
+			cType = CParameter::Type::CType::Char;
+			pointerLevels += 1;
+		break;
+
+		case LuaParameter::Type::UserData:
+			cType = CParameter::Type::CType::Void;
+			pointerLevels += 1;
+		break;
+
+		case LuaParameter::Type::Table:
+			cType = CParameter::Type::CType::NonPrimitive;
+			typeName = param.typeName;
+		break;
+	}
+
+	return CParameter::Type(cType, typeName, pointerLevels);
+}
+
+
+const CFunctionSpec BindingGenerator::getBindingCallBackFunction(const LuaFunctionSpec &functionSpec) const {
+	
+	std::vector<CParameter> cParams;
+	for(auto &paramIn : functionSpec.getParametersIn()) {
+		cParams.push_back(CParameter(
+			paramIn.name,
+			getCParameterTypeTranslation(paramIn, false)
+		));
+	}
+
+	for(auto &paramOut : functionSpec.getParametersOut()) {
+		cParams.push_back(CParameter(
+			paramOut.name,
+			getCParameterTypeTranslation(paramOut, true)
+		));
+	}
+
+	return CFunctionSpec(
+		generateFunctionPointerTypeName(functionSpec.getName()),
+		CParameter::Type(CParameter::Type::CType::Int, "", 0),
+		cParams
+	);
+}
 
 const std::string BindingGenerator::generateBindingInterface() const {
 	std::stringstream stream;
@@ -453,10 +495,12 @@ const std::string BindingGenerator::generateBindingInterface() const {
 	writeCustomTypes(m_autoBindFile.getStructSpecifications(), stream);
 	stream << std::endl;
 	
-	writeFunctionPointerTypes(m_autoBindFile.getFunctionSpecifications(), stream);
-	stream << std::endl;
+	for(auto &fs : m_autoBindFile.getFunctionSpecifications()) {
+		codeWriter.writeFunctionPointerTypeDef(getBindingCallBackFunction(fs));
+		codeWriter.writeNewLine();
+	}
 
-	for (auto fs : m_autoBindFile.getFunctionSpecifications()) {
+	for(auto &fs : m_autoBindFile.getFunctionSpecifications()) {
 		codeWriter.writeFunctionPrototype(getFunctionPointerSetterFunction(fs));
 		codeWriter.writeNewLine();
 	}
@@ -509,6 +553,7 @@ const std::string BindingGenerator::generateBindingImplementation() const {
 			args.push_back(getRegisterModuleFunction().getInputParams()[0].getName());
 			args.push_back('\"' + fs.getName() + "\"");
 			args.push_back('\"' + generateBindingFunctionName(fs.getName() + '\"'));
+
 			codeWriter.writeFunctionCall(luaRegisterFunction, args);
 			
 			if(&fs != &functionSpecifications.back()) {
