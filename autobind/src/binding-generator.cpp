@@ -6,54 +6,54 @@
 
 static const std::string functionPointerSetterParameterName = "function";
 
-static std::unordered_map<Parameter::Type, std::string> parameterTypeToCParameterStringMap() {
-	std::unordered_map<Parameter::Type, std::string> parameterTypeStrings;
+static std::unordered_map<LuaParameter::Type, std::string> parameterTypeToCParameterStringMap() {
+	std::unordered_map<LuaParameter::Type, std::string> parameterTypeStrings;
 
-	parameterTypeStrings[Parameter::Type::Number] = "double";
-	parameterTypeStrings[Parameter::Type::String] = "const char *";
-	parameterTypeStrings[Parameter::Type::UserData] = "void *";
+	parameterTypeStrings[LuaParameter::Type::Number] = "double";
+	parameterTypeStrings[LuaParameter::Type::String] = "const char *";
+	parameterTypeStrings[LuaParameter::Type::UserData] = "void *";
 
 	return parameterTypeStrings;
 }
 
-static std::unordered_map<Parameter::Type, std::string> parameterTypeToLuaParameterStringMap() {
-	std::unordered_map<Parameter::Type, std::string> parameterTypeStrings;
+static std::unordered_map<LuaParameter::Type, std::string> parameterTypeToLuaParameterStringMap() {
+	std::unordered_map<LuaParameter::Type, std::string> parameterTypeStrings;
 
-	parameterTypeStrings[Parameter::Type::Number] = "number";
-	parameterTypeStrings[Parameter::Type::String] = "string";
-	parameterTypeStrings[Parameter::Type::UserData] = "userdata";
-	parameterTypeStrings[Parameter::Type::Table] = "table";
+	parameterTypeStrings[LuaParameter::Type::Number] = "number";
+	parameterTypeStrings[LuaParameter::Type::String] = "string";
+	parameterTypeStrings[LuaParameter::Type::UserData] = "userdata";
+	parameterTypeStrings[LuaParameter::Type::Table] = "table";
 	
 
 	return parameterTypeStrings;
 }
 
-static const std::unordered_map<Parameter::Type, std::string> getParameterTypeCheckFunctions() {
-	std::unordered_map<Parameter::Type, std::string> parameterCheckTypeFunctions;
-	parameterCheckTypeFunctions[Parameter::Type::Number] = "lua_isnumber";
-	parameterCheckTypeFunctions[Parameter::Type::String] = "lua_isstring";
-	parameterCheckTypeFunctions[Parameter::Type::UserData] = "lua_isuserdata";
-	parameterCheckTypeFunctions[Parameter::Type::Table] = "lua_istable";
+static const std::unordered_map<LuaParameter::Type, std::string> getParameterTypeCheckFunctions() {
+	std::unordered_map<LuaParameter::Type, std::string> parameterCheckTypeFunctions;
+	parameterCheckTypeFunctions[LuaParameter::Type::Number] = "lua_isnumber";
+	parameterCheckTypeFunctions[LuaParameter::Type::String] = "lua_isstring";
+	parameterCheckTypeFunctions[LuaParameter::Type::UserData] = "lua_isuserdata";
+	parameterCheckTypeFunctions[LuaParameter::Type::Table] = "lua_istable";
 
 	return parameterCheckTypeFunctions;
 }
 
-static std::unordered_map<Parameter::Type, std::string> getParameterValueFunctions() {
-	std::unordered_map<Parameter::Type, std::string> parameterValueFunctions;
-	parameterValueFunctions[Parameter::Type::String] = "lua_tostring";
-	parameterValueFunctions[Parameter::Type::Number] = "lua_tonumber";
-	parameterValueFunctions[Parameter::Type::UserData] = "lua_touserdata";
+static std::unordered_map<LuaParameter::Type, std::string> getParameterValueFunctions() {
+	std::unordered_map<LuaParameter::Type, std::string> parameterValueFunctions;
+	parameterValueFunctions[LuaParameter::Type::String] = "lua_tostring";
+	parameterValueFunctions[LuaParameter::Type::Number] = "lua_tonumber";
+	parameterValueFunctions[LuaParameter::Type::UserData] = "lua_touserdata";
 
 	return parameterValueFunctions;
 }
 
-static std::string generateCParameter(const Parameter &parameter, bool out) {
+static std::string generateCParameter(const LuaParameter &parameter, bool out) {
 	std::stringstream stringStream;
-	std::unordered_map<Parameter::Type, std::string> parameterTypeStrings;
+	std::unordered_map<LuaParameter::Type, std::string> parameterTypeStrings;
 
-	parameterTypeStrings[Parameter::Type::Number] = "double";
-	parameterTypeStrings[Parameter::Type::String] = "const char *";
-	parameterTypeStrings[Parameter::Type::UserData] = "void *";
+	parameterTypeStrings[LuaParameter::Type::Number] = "double";
+	parameterTypeStrings[LuaParameter::Type::String] = "const char *";
+	parameterTypeStrings[LuaParameter::Type::UserData] = "void *";
 	const std::string &typeString = parameterTypeStrings.at(parameter.type);
 
 	if (typeString.back() != '*') { // ensure the pointer is right next to the identifier
@@ -69,12 +69,12 @@ static std::string generateCParameter(const Parameter &parameter, bool out) {
 	return stringStream.str();
 }	
 
-static std::string generateCParameterInstance(const Parameter &parameter, bool pointer) {
+static std::string generateCParameterInstance(const LuaParameter &parameter, bool pointer) {
 	std::stringstream stringStream;
 	
-	std::unordered_map<Parameter::Type, std::string> parameterTypeStrings = parameterTypeToCParameterStringMap();
+	std::unordered_map<LuaParameter::Type, std::string> parameterTypeStrings = parameterTypeToCParameterStringMap();
 	
-	const std::string &typeString = (parameter.type == Parameter::Type::Table) ?
+	const std::string &typeString = (parameter.type == LuaParameter::Type::Table) ?
 		parameter.typeName : parameterTypeStrings.at(parameter.type);
 
 	stringStream << typeString;
@@ -91,7 +91,7 @@ static std::string generateCParameterInstance(const Parameter &parameter, bool p
 	return stringStream.str();
 }
 
-static std::string generateCParameterList(const std::vector<Parameter> &parameters, bool out) {
+static std::string generateCParameterList(const std::vector<LuaParameter> &parameters, bool out) {
 	std::stringstream stringStream;	
 
 	for (auto &param : parameters) {
@@ -194,10 +194,10 @@ static void writeFunctionPointerSetterImplementations(const std::vector<LuaFunct
 	}
 }
 
-static void writeIfTypeCorrectGet(const Parameter &param, int stackIndex, std::stringstream &stringStream, int indentationLevel) {
-	std::unordered_map<Parameter::Type, std::string> parameterCheckTypeFunctions = getParameterTypeCheckFunctions();
-	std::unordered_map<Parameter::Type, std::string> parameterValueFunctions = getParameterValueFunctions();
-	std::unordered_map<Parameter::Type, std::string> luaParameterTypes = parameterTypeToLuaParameterStringMap();
+static void writeIfTypeCorrectGet(const LuaParameter &param, int stackIndex, std::stringstream &stringStream, int indentationLevel) {
+	std::unordered_map<LuaParameter::Type, std::string> parameterCheckTypeFunctions = getParameterTypeCheckFunctions();
+	std::unordered_map<LuaParameter::Type, std::string> parameterValueFunctions = getParameterValueFunctions();
+	std::unordered_map<LuaParameter::Type, std::string> luaParameterTypes = parameterTypeToLuaParameterStringMap();
 	std::string indentation = generateIndentation(indentationLevel);
 	// Generates an if-statement checking the type of the parameter
 	stringStream << indentation << "if (" << parameterCheckTypeFunctions.at(param.type) << "(L, "
@@ -211,24 +211,24 @@ static void writeIfTypeCorrectGet(const Parameter &param, int stackIndex, std::s
 }
 
 static void writeBindingImplementation(const LuaFunctionSpec &functionSpec, std::stringstream &stringStream) {
-	std::unordered_map<Parameter::Type, std::string> 
+	std::unordered_map<LuaParameter::Type, std::string> 
 		parameterTypeStrings = parameterTypeToCParameterStringMap();
 
-	std::unordered_map<Parameter::Type, std::string>
+	std::unordered_map<LuaParameter::Type, std::string>
 		luaParameterTypes = parameterTypeToLuaParameterStringMap();
 
-	std::unordered_map<Parameter::Type, std::string> parameterCheckTypeFunctions = getParameterTypeCheckFunctions();
-	std::unordered_map<Parameter::Type, std::string> parameterValueFunctions = getParameterValueFunctions();
+	std::unordered_map<LuaParameter::Type, std::string> parameterCheckTypeFunctions = getParameterTypeCheckFunctions();
+	std::unordered_map<LuaParameter::Type, std::string> parameterValueFunctions = getParameterValueFunctions();
 
-	std::unordered_map<Parameter::Type, std::string> luaPushValueFunctions;
-	luaPushValueFunctions[Parameter::Type::Number] = "lua_pushnumber";
-	luaPushValueFunctions[Parameter::Type::String] = "lua_pushstring";
-	luaPushValueFunctions[Parameter::Type::UserData] = "lua_pushlightuserdata";
+	std::unordered_map<LuaParameter::Type, std::string> luaPushValueFunctions;
+	luaPushValueFunctions[LuaParameter::Type::Number] = "lua_pushnumber";
+	luaPushValueFunctions[LuaParameter::Type::String] = "lua_pushstring";
+	luaPushValueFunctions[LuaParameter::Type::UserData] = "lua_pushlightuserdata";
 
 	stringStream << "static " << generateBindingFunctionPrototype(functionSpec.getName()) << " {" << std::endl;
 
-	const std::vector<Parameter> inParams = functionSpec.getParametersIn();
-	const std::vector<Parameter> outParams = functionSpec.getParametersOut();
+	const std::vector<LuaParameter> inParams = functionSpec.getParametersIn();
+	const std::vector<LuaParameter> outParams = functionSpec.getParametersOut();
 	
 	for (auto inParam : inParams) {
 		stringStream << '\t' << generateCParameterInstance(inParam, false) << ';' << std::endl;
@@ -250,7 +250,7 @@ static void writeBindingImplementation(const LuaFunctionSpec &functionSpec, std:
 
 
 		int luaIndex = -(inParams.size() - i);
-		if(inParams[i].type == Parameter::Type::Table) {
+		if(inParams[i].type == LuaParameter::Type::Table) {
 			stringStream << "\t" << "if(lua_istable(L, " << luaIndex << ")) {" << std::endl;
 			stringStream << "\t\t" << "if(!" << generateCustomGetterFunctionName(inParams[i].typeName) << "(L, " << luaIndex << ", &" << inParams[i].name << ")) {" << std::endl;
 			stringStream << "\t\t\t" << "return luaL_error(L, \"Error loading custom type " << inParams[i].typeName << "\");" << std::endl;
@@ -362,8 +362,8 @@ static void writeRegisterModuleImplementation(const std::string moduleName, cons
 }
 
 static void writeCustomGetters(const std::vector<StructSpec> &structSpecifications, std::stringstream &stringStream) {
-	const std::unordered_map<Parameter::Type, std::string> &parameterTypeCheckFunctions = getParameterTypeCheckFunctions();
-	const std::unordered_map<Parameter::Type, std::string> &parameterValueFunctions = getParameterValueFunctions();
+	const std::unordered_map<LuaParameter::Type, std::string> &parameterTypeCheckFunctions = getParameterTypeCheckFunctions();
+	const std::unordered_map<LuaParameter::Type, std::string> &parameterValueFunctions = getParameterValueFunctions();
 
 	for(auto &structSpec : structSpecifications) {
 		stringStream << generateCustomGetterFunctionPrototype(structSpec.getName()) << ";" << std::endl; 
@@ -380,7 +380,7 @@ static void writeCustomGetters(const std::vector<StructSpec> &structSpecificatio
 		for(auto &member : structSpec.getMembers()) {
 			stringStream << "\tlua_getfield(L, index, " << "\"" << member.name << "\");" << std::endl;
 			
-			if(member.type == Parameter::Type::Table) {
+			if(member.type == LuaParameter::Type::Table) {
 				stringStream << "\t" << "if (!" << generateCustomGetterFunctionName(member.typeName) << "(L, 1, &" << member.name << ")) {" << std::endl;
 				stringStream << "\t\t" << "lua_pop(L, 1);" << std::endl;
 				stringStream << "\t\t" << "return 0;" << std::endl;

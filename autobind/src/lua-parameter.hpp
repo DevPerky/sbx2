@@ -2,7 +2,7 @@
 #define PARAMETER_H
 #include <string>
 
-class Parameter {
+class LuaParameter {
 
 	public:
 		enum class Type {
@@ -16,7 +16,7 @@ class Parameter {
 		std::string typeName;
 		Type type;
 
-		Parameter(const std::string &name, Type type, const std::string &typeString)
+		LuaParameter(const std::string &name, Type type, const std::string &typeString)
 			: name(name), type(type), typeName(typeString) {}
 };
 #endif

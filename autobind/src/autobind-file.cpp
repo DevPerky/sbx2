@@ -10,14 +10,14 @@ static bool elementNameEquals(const tinyxml2::XMLElement *element, const std::st
 	return std::string(element->Value()).compare(string) == 0;
 }
 
-static Parameter parseParameterElement(const tinyxml2::XMLElement *parameterElement) {
+static LuaParameter parseParameterElement(const tinyxml2::XMLElement *parameterElement) {
 	auto nameAttribute = parameterElement->FindAttribute("name");
 	
-	std::unordered_map<std::string, Parameter::Type> parameterTypes;
+	std::unordered_map<std::string, LuaParameter::Type> parameterTypes;
 
-	parameterTypes["number"] = Parameter::Type::Number;
-	parameterTypes["string"] = Parameter::Type::String;
-	parameterTypes["userdata"] = Parameter::Type::UserData;
+	parameterTypes["number"] = LuaParameter::Type::Number;
+	parameterTypes["string"] = LuaParameter::Type::String;
+	parameterTypes["userdata"] = LuaParameter::Type::UserData;
 
 
 	if (!nameAttribute) {
@@ -31,21 +31,21 @@ static Parameter parseParameterElement(const tinyxml2::XMLElement *parameterElem
 		throw "parameter missing type";
 	}
 
-	Parameter::Type type;
+	LuaParameter::Type type;
 	const std::string &typeValue = typeAttribute->Value();
 
 	if(parameterTypes.count(typeValue) == 0) {
-		type = Parameter::Type::Table;
+		type = LuaParameter::Type::Table;
 	}
 	else {
 		type = parameterTypes[typeValue];
 	}
 
-	return Parameter(name, type, typeValue);
+	return LuaParameter(name, type, typeValue);
 }
 
-static std::vector<Parameter> parseParameterElements(const tinyxml2::XMLElement *root) {
-	std::vector<Parameter> parameters;
+static std::vector<LuaParameter> parseParameterElements(const tinyxml2::XMLElement *root) {
+	std::vector<LuaParameter> parameters;
 
 	const tinyxml2::XMLElement *parameterElement = root->FirstChildElement("Parameter");
 
@@ -64,27 +64,27 @@ static LuaFunctionSpec parseFunctionElement(const tinyxml2::XMLElement *function
 	}
 
 	const char *name = functionElement->FindAttribute("name")->Value();
-	std::vector<Parameter> parametersIn, parametersOut;
+	std::vector<LuaParameter> parametersIn, parametersOut;
 	const tinyxml2::XMLElement *element = 0;
 
 	// Parse in elements
 	// TODO: find a way around this code repetition 
 	element = functionElement->FirstChildElement("In");
 	if (element) {
-		std::vector<Parameter> params = parseParameterElements(element);
+		std::vector<LuaParameter> params = parseParameterElements(element);
 		std::copy(params.begin(), params.end(), std::back_inserter(parametersIn));
 	}
 
 	// Parse out elements
 	element = functionElement->FirstChildElement("Out");
 	if (element) {
-		std::vector<Parameter> params = parseParameterElements(element);
+		std::vector<LuaParameter> params = parseParameterElements(element);
 		std::copy(params.begin(), params.end(), std::back_inserter(parametersOut));
 	}
 
 	//Check for same name parameters - Illegal!
 	bool doubleParams = false;
-	for (const Parameter &pIn : parametersIn) {
+	for (const LuaParameter &pIn : parametersIn) {
 		for (auto pOut : parametersOut) {
 			if (pIn.name == pOut.name) {
 				doubleParams = true;
@@ -92,7 +92,7 @@ static LuaFunctionSpec parseFunctionElement(const tinyxml2::XMLElement *function
 			}
 		}
 
-		for (const Parameter &pIn2 : parametersIn) {
+		for (const LuaParameter &pIn2 : parametersIn) {
 			if (pIn.name == pIn2.name && &pIn != &pIn2) {
 				doubleParams = true;
 				break;
@@ -119,7 +119,7 @@ static StructSpec parseStructElement(const tinyxml2::XMLElement *structElement) 
 	const char *name = structElement->FindAttribute("name")->Value();
 	const tinyxml2::XMLElement *element = 0;
 
-	std::vector<Parameter> members;
+	std::vector<LuaParameter> members;
 	// Parse member elements
 	// TODO: find a way around this code repetition 
 	element = structElement->FirstChildElement("Members");

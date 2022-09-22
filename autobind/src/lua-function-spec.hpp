@@ -12,22 +12,22 @@ public:
 		return m_name;
 	}
 
-	inline const std::vector<Parameter>& getParametersIn() const {
+	inline const std::vector<LuaParameter>& getParametersIn() const {
 		return m_parametersIn;
 	}
 
-	inline const std::vector<Parameter>& getParametersOut() const {
+	inline const std::vector<LuaParameter>& getParametersOut() const {
 		return m_parametersOut;
 	}
 
 	LuaFunctionSpec(const std::string name,
-		std::vector<Parameter> parametersIn,
-		std::vector<Parameter> parametersOut)
+		std::vector<LuaParameter> parametersIn,
+		std::vector<LuaParameter> parametersOut)
 		: m_name(name), m_parametersIn(parametersIn), m_parametersOut(parametersOut) {}
 
 private:
 	const std::string m_name;
-	const std::vector<Parameter> m_parametersIn, m_parametersOut;
+	const std::vector<LuaParameter> m_parametersIn, m_parametersOut;
 };
 
 #endif
