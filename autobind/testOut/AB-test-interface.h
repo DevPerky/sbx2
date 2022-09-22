@@ -11,7 +11,7 @@ typedef struct Test2 {
 }Test2;
 
 
-typedef int (*AB_customTypeIn)(Test customParam);
+typedef int (*AB_customTypeIn)(Test customParam, const char *stringParam);
 
 void AB_bind_customTypeIn(AB_customTypeIn function);
 
