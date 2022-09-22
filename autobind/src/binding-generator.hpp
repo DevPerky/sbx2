@@ -10,9 +10,11 @@
 class BindingGenerator {
 private:
     const AutoBindFile &m_autoBindFile;
+
+	const CFunctionSpec getRegisterModuleFunction() const;
 public:
-    BindingGenerator(const AutoBindFile &autoBindFile)
-        : m_autoBindFile(autoBindFile) {}
+    inline BindingGenerator::BindingGenerator(const AutoBindFile &autoBindFile) 
+		: m_autoBindFile(autoBindFile) {}
 
     const std::string generateBindingInterface() const;
 	const std::string generateBindingImplementation() const;
