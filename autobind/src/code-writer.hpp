@@ -6,7 +6,7 @@
 class CodeWriter {
 private:
     std::stringstream &m_stringStream;
-    int m_indentationLevel;
+    int m_indentationLevel = 0;
     void writeFunctionHeader(const CFunctionSpec &functionSpec);
     const std::string generateIndentationString() const;
 
