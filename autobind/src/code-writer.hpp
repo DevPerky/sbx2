@@ -22,6 +22,7 @@ public:
     void writeCParameter(const CParameter &parameter, bool isStatic = false);
     void writeVariableInstance(const CParameter &parameter, bool isStatic = false);
     void writeVariableAssignment(const std::string &variableName, const std::string &value);
+    void writeFunctionCall(const CFunctionSpec &functionSpec, const std::vector<std::string> &args);
     void writeNewLine();
     
     inline void setIndentationLevel(int indentationLevel) {

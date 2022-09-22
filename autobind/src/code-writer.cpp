@@ -9,6 +9,7 @@ static const std::unordered_map<CParameter::Type::CType, std::string> cTypeStrin
     map[CParameter::Type::CType::Double] = "double";
     map[CParameter::Type::CType::Float] = "float";
     map[CParameter::Type::CType::Void] = "void";
+    map[CParameter::Type::CType::Char] = "char";
 
     return map;
 }
@@ -72,6 +73,20 @@ void CodeWriter::writeFunctionHeader(const CFunctionSpec &functionSpec, bool isS
 
     m_stringStream << ")";
 }
+
+void CodeWriter::writeFunctionCall(const CFunctionSpec &functionSpec, const std::vector<std::string> &args) {
+    m_stringStream << generateIndentationString();
+    m_stringStream << functionSpec.getName();
+    m_stringStream << "(";
+    for(auto &arg : args) {
+        m_stringStream << arg;
+        if(&arg != &args.back()) {
+            m_stringStream << ", ";
+        }
+    }
+    m_stringStream << ");";
+}
+
 
 void CodeWriter::writeFunctionPrototype(const CFunctionSpec &functionSpec) {
     writeFunctionHeader(functionSpec);
