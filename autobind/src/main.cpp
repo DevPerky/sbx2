@@ -1,5 +1,5 @@
-#include "autobind-file.h"
-#include "binding-generator.h"
+#include "autobind-file.hpp"
+#include "binding-generator.hpp"
 
 #include <iostream>
 #include <fstream>

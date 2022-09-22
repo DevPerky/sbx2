@@ -2,7 +2,7 @@
 #define BINDING_GENERATOR_H
 #include <vector>
 #include "lua-function-spec.h"
-#include "autobind-file.h"
+#include "autobind-file.hpp"
 #include <string>
 
 class BindingGenerator {

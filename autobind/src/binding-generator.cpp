@@ -1,4 +1,4 @@
-#include "binding-generator.h"
+#include "binding-generator.hpp"
 #include <sstream>
 #include <iostream>
 #include <unordered_map>
