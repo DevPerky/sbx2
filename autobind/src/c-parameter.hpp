@@ -10,7 +10,8 @@ public:
             Int,
             Float,
             Double,
-            Void
+            Void,
+            Char
         }const cType;
         const std::string typeName;
         const unsigned int pointerLevels;
