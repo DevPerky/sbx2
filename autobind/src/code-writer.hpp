@@ -2,6 +2,7 @@
 #define CODE_WRITER_H
 #include <sstream>
 #include "c-function-spec.hpp"
+#include <functional>
 
 class CodeWriter {
 private:
@@ -17,7 +18,10 @@ public:
         : m_stringStream(stringStream) {}
 
     void writeFunctionPrototype(const CFunctionSpec &functionSpec);
-    void writeCParameter(const CParameter &parameter);
+    void writeFunctionImplementation(const CFunctionSpec &functionSpec, std::function<void()> writeContents);
+    void writeCParameter(const CParameter &parameter, bool isStatic = false);
+    void writeVariableInstance(const CParameter &parameter, bool isStatic = false);
+    void writeVariableAssignment(const std::string &variableName, const std::string &value);
     void writeNewLine();
     
     inline void setIndentationLevel(int indentationLevel) {

@@ -19,10 +19,14 @@ const std::string CodeWriter::generateIndentationString() const {
     return indentationString;
 }
 
-void CodeWriter::writeCParameter(const CParameter &parameter) {
+void CodeWriter::writeCParameter(const CParameter &parameter, bool isStatic) {
 	auto &cTypeStrings = cTypeStringMap();
 
-    if(parameter.getType().cType != CParameter::Type::CType::Struct) {
+    if(isStatic) {
+        m_stringStream << "static ";
+    }
+
+    if(parameter.getType().cType != CParameter::Type::CType::NonPrimitive) {
         m_stringStream << cTypeStrings.at(parameter.getType().cType);
     }
     else {
@@ -35,13 +39,19 @@ void CodeWriter::writeCParameter(const CParameter &parameter) {
     } 
     
     m_stringStream << parameter.getName();
-}	
+}
+
+void CodeWriter::writeVariableInstance(const CParameter &parameter, bool isStatic) {
+    writeCParameter(parameter, isStatic);
+    m_stringStream << ";" << std::endl;
+}
+
 
 void CodeWriter::writeFunctionHeader(const CFunctionSpec &functionSpec, bool isStatic) {
     auto &cTypeStrings = cTypeStringMap();
     auto &indentationString = generateIndentationString();
 
-    const std::string &returnTypeString = (functionSpec.getReturnType().cType != CParameter::Type::CType::Struct) ?
+    const std::string &returnTypeString = (functionSpec.getReturnType().cType != CParameter::Type::CType::NonPrimitive) ?
         cTypeStrings.at(functionSpec.getReturnType().cType) : functionSpec.getReturnType().typeName;
     
     m_stringStream << indentationString;
@@ -66,6 +76,22 @@ void CodeWriter::writeFunctionHeader(const CFunctionSpec &functionSpec, bool isS
 void CodeWriter::writeFunctionPrototype(const CFunctionSpec &functionSpec) {
     writeFunctionHeader(functionSpec);
     m_stringStream << ";";
+}
+
+void CodeWriter::writeFunctionImplementation(const CFunctionSpec &functionSpec, std::function<void()> writeContents) {
+    writeFunctionHeader(functionSpec);
+    m_stringStream << " {" << std::endl;
+    int startIndentation = m_indentationLevel;
+    m_indentationLevel++;
+    writeContents();
+    m_indentationLevel = startIndentation;
+    writeNewLine();
+    m_stringStream << "}";
+}
+
+void CodeWriter::writeVariableAssignment(const std::string &variableName, const std::string &value) {
+    m_stringStream << generateIndentationString();
+    m_stringStream << variableName << " = " << value << ";";
 }
 
 void CodeWriter::writeNewLine() {
