@@ -15,9 +15,18 @@ private:
 	const CFunctionSpec getFunctionPointerSetterFunction(const LuaFunctionSpec &functionSpec) const;
 	const CFunctionSpec getLuaRegisterFunction() const;
 	const CFunctionSpec getBindingCallBackFunction(const LuaFunctionSpec &functionSpec) const;
+	const CFunctionSpec getBindingFunction(const LuaFunctionSpec &functionSpec) const;
+	const CFunctionSpec getLuaCheckTypeFunction(const LuaParameter::Type &luaType) const;
+	const CFunctionSpec getLuaPushFunction(const CParameter::Type &parameterType) const;
+	const CFunctionSpec getLuaToFunction(const LuaParameter &parameter) const;
+	const CFunctionSpec getLuaLErrorFunction() const;
 	
 	const CParameter::Type getCParameterTypeTranslation(const LuaParameter &param, bool out) const;
-	
+	const std::vector<CParameter> getCParameters(
+		const std::vector<LuaParameter> &inParams,
+		const std::vector<LuaParameter> &outParams,
+		bool asFields = false
+	) const;
 	
 public:
     inline BindingGenerator(const AutoBindFile &autoBindFile) 
