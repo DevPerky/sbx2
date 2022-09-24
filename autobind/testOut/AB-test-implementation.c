@@ -3,8 +3,8 @@
 
 static AB_customTypeIn AB_customTypeIn_binding;
 
-Test AB_to_Test(lua_State *L, int index);
-Test2 AB_to_Test2(lua_State *L, int index);
+static Test AB_to_Test(lua_State *L, int index);
+static Test2 AB_to_Test2(lua_State *L, int index);
 int AB_push_Test(lua_State *L, Test value);
 int AB_push_Test2(lua_State *L, Test2 value);
 
@@ -13,13 +13,13 @@ static Test AB_to_Test(lua_State *L, int index) {
 
 	lua_getfield(L, index, "testNumber");
 	result.testNumber = lua_tonumber(L, -1);
-	lua_pop(L, -1);
+	lua_pop(L, 1);
 	lua_getfield(L, index, "testString");
 	result.testString = lua_tostring(L, -1);
-	lua_pop(L, -1);
+	lua_pop(L, 1);
 	lua_getfield(L, index, "testUserData");
 	result.testUserData = lua_touserdata(L, -1);
-	lua_pop(L, -1);
+	lua_pop(L, 1);
 
 	return result;
 }
@@ -29,7 +29,7 @@ static Test2 AB_to_Test2(lua_State *L, int index) {
 
 	lua_getfield(L, index, "customParam");
 	result.customParam = AB_to_Test(L, -1);
-	lua_pop(L, -1);
+	lua_pop(L, 1);
 
 	return result;
 }
@@ -64,8 +64,8 @@ void AB_bind_customTypeIn(AB_customTypeIn function) {
 
 static int l_customTypeIn(lua_State *L) {
 	Test customParam;
-	char *stringParam;
-	char *outString;
+	const char *stringParam;
+	const char *outString;
 	Test customParamOut;
 
 	if(lua_isstring(L, -1)) {
@@ -94,5 +94,5 @@ static int l_customTypeIn(lua_State *L) {
 }
 
 void AB_registerModule_test(lua_State *L) {
-	lua_register(L, "customTypeIn", "l_customTypeIn");
+	lua_register(L, "customTypeIn", l_customTypeIn);
 }
