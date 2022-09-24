@@ -94,6 +94,7 @@ const CParameter::Type BindingGenerator::getCParameterTypeTranslation(const LuaP
 	CParameter::Type::CType cType;
 	int pointerLevels = out ? 1 : 0;
 	std::string typeName = "";
+	bool isConst = false;
 
 	switch(param.type) {
 		case LuaParameter::Type::Number:
@@ -102,6 +103,7 @@ const CParameter::Type BindingGenerator::getCParameterTypeTranslation(const LuaP
 
 		case LuaParameter::Type::String:
 			cType = CParameter::Type::CType::Char;
+			isConst = true;
 			pointerLevels += 1;
 		break;
 
@@ -116,7 +118,7 @@ const CParameter::Type BindingGenerator::getCParameterTypeTranslation(const LuaP
 		break;
 	}
 
-	return CParameter::Type(cType, typeName, pointerLevels);
+	return CParameter::Type(cType, typeName, pointerLevels, isConst);
 }
 
 const std::vector<CParameter> BindingGenerator::getCParameters(
@@ -577,7 +579,7 @@ const std::string BindingGenerator::generateBindingImplementation() const {
 				std::vector<std::string> popFunctionArgs;
 				popFunctionArgs.resize(2);
 				popFunctionArgs[0] = cFunctionSpec.getInputParams()[0].getName();
-				popFunctionArgs[1] = "-1";
+				popFunctionArgs[1] = "1";
 
 				auto &luaPopFunction = getLuaPopFunction();
 				codeWriter.writeFunctionCall(luaPopFunction, popFunctionArgs, true);
@@ -768,7 +770,7 @@ const std::string BindingGenerator::generateBindingImplementation() const {
 
 			args.push_back(getRegisterModuleFunction().getInputParams()[0].getName());
 			args.push_back('\"' + fs.getName() + "\"");
-			args.push_back('\"' + generateBindingFunctionName(fs.getName() + '\"'));
+			args.push_back(generateBindingFunctionName(fs.getName()));
 
 			codeWriter.writeFunctionCall(luaRegisterFunction, args);
 			

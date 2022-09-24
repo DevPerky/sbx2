@@ -15,9 +15,15 @@ public:
         }const cType;
         const std::string typeName;
         const unsigned int pointerLevels;
+        const bool m_isConst;
 
-        inline Type(CType cType, const std::string &typeName, const unsigned int pointerLevels)
-            : cType(cType), typeName(typeName), pointerLevels(pointerLevels) {}
+        inline Type(CType cType, const std::string &typeName, const unsigned int pointerLevels, bool isConst = false)
+            : cType(cType), typeName(typeName), pointerLevels(pointerLevels), m_isConst(isConst) {}
+
+        inline const bool isConst() const {
+            return m_isConst;
+        }
+        
     };
 
 private:

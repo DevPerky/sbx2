@@ -28,6 +28,10 @@ void CodeWriter::writeCParameter(const CParameter &parameter, bool isStatic) {
         m_stringStream << "static ";
     }
 
+    if(parameter.getType().isConst()) {
+        m_stringStream << "const ";
+    }
+
     if(parameter.getType().cType != CParameter::Type::CType::NonPrimitive) {
         m_stringStream << cTypeStrings.at(parameter.getType().cType);
     }
@@ -136,6 +140,10 @@ void CodeWriter::writeFunctionPointerCall(const std::string functionPointerName,
 }
 
 void CodeWriter::writeFunctionPrototype(const CFunctionSpec &functionSpec) {
+    if(functionSpec.isStatic()) {
+        m_stringStream << "static ";
+    }
+
     writeFunctionHeader(functionSpec);
     m_stringStream << ";";
 }
