@@ -18,6 +18,13 @@
       <Parameter type="Test" name="customParam"/>
       <Parameter type="string" name="stringParam"/>
     </In>
+
+    <Out>
+      <Parameter type="string" name="outString"/>
+      <Parameter type="Test" name="customParamOut"/>
+    </Out>
+
+    
   </FunctionSpec>
 
 </Bindings>

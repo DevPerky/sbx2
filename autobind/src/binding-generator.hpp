@@ -4,6 +4,7 @@
 #include "lua-function-spec.hpp"
 #include "autobind-file.hpp"
 #include "code-writer.hpp"
+#include "c-struct.hpp"
 
 #include <string>
 
@@ -19,9 +20,20 @@ private:
 	const CFunctionSpec getLuaCheckTypeFunction(const LuaParameter::Type &luaType) const;
 	const CFunctionSpec getLuaPushFunction(const CParameter::Type &parameterType) const;
 	const CFunctionSpec getLuaToFunction(const LuaParameter &parameter) const;
+	const CFunctionSpec getLuaGetFieldFunction() const;
+	const CFunctionSpec getLuaCreateTableFunction() const;
+	const CFunctionSpec getLuaSetTableFunction() const;
+	
+	const CFunctionSpec getLuaPopFunction () const;
 	const CFunctionSpec getLuaLErrorFunction() const;
+
+	const std::string getLuaTypeString(const LuaParameter &param) const;
 	
 	const CParameter::Type getCParameterTypeTranslation(const LuaParameter &param, bool out) const;
+	const CParameter getBindingPointerVariable(const LuaFunctionSpec &functionSpec) const;
+
+	const CStruct getCStruct(const StructSpec &structSpec) const;
+
 	const std::vector<CParameter> getCParameters(
 		const std::vector<LuaParameter> &inParams,
 		const std::vector<LuaParameter> &outParams,

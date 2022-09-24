@@ -2,6 +2,7 @@
 #define CODE_WRITER_H
 #include <sstream>
 #include "c-function-spec.hpp"
+#include "c-struct.hpp"
 #include <functional>
 
 class CodeWriter {
@@ -36,9 +37,10 @@ public:
     void writeVariableAssignment(const std::string &variableName, const std::string &value);
     void writeVariableAssignment(const std::string &variableName, const CFunctionSpec &function, const std::vector<std::string> &args);
     void writeComparisonOperation(std::function<void()> expressionA, std::function<void()> expressionB, ComparisonOperator op);
+    
+    void writeStruct(const CStruct &cStruct);
     void writeFunctionCall(const CFunctionSpec &functionSpec, const std::vector<std::string> &args, bool atomically = true);
     void writeFunctionPointerCall(const std::string functionPointerName, const std::vector<std::string> &args, bool atomically = true);
-    
     void writeIfStatement(std::function<void()> writePredicate, std::function<void()> writeIfTrue);
     void writeElseStatement(std::function<void()> content);
     void writeReturnStatement(std::function<void()> content);

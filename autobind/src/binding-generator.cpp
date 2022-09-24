@@ -4,114 +4,8 @@
 #include <unordered_map>
 #include <exception>
 
-static const std::string functionPointerSetterParameterName = "function";
-
-static std::unordered_map<LuaParameter::Type, std::string> parameterTypeToCParameterStringMap() {
-	std::unordered_map<LuaParameter::Type, std::string> parameterTypeStrings;
-
-	parameterTypeStrings[LuaParameter::Type::Number] = "double";
-	parameterTypeStrings[LuaParameter::Type::String] = "const char *";
-	parameterTypeStrings[LuaParameter::Type::UserData] = "void *";
-
-	return parameterTypeStrings;
-}
-
-static std::unordered_map<LuaParameter::Type, std::string> parameterTypeToLuaParameterStringMap() {
-	std::unordered_map<LuaParameter::Type, std::string> parameterTypeStrings;
-
-	parameterTypeStrings[LuaParameter::Type::Number] = "number";
-	parameterTypeStrings[LuaParameter::Type::String] = "string";
-	parameterTypeStrings[LuaParameter::Type::UserData] = "userdata";
-	parameterTypeStrings[LuaParameter::Type::Table] = "table";
-	
-
-	return parameterTypeStrings;
-}
-
-static const std::unordered_map<LuaParameter::Type, std::string> getParameterTypeCheckFunctions() {
-	std::unordered_map<LuaParameter::Type, std::string> parameterCheckTypeFunctions;
-	parameterCheckTypeFunctions[LuaParameter::Type::Number] = "lua_isnumber";
-	parameterCheckTypeFunctions[LuaParameter::Type::String] = "lua_isstring";
-	parameterCheckTypeFunctions[LuaParameter::Type::UserData] = "lua_isuserdata";
-	parameterCheckTypeFunctions[LuaParameter::Type::Table] = "lua_istable";
-
-	return parameterCheckTypeFunctions;
-}
-
-static std::unordered_map<LuaParameter::Type, std::string> getParameterValueFunctions() {
-	std::unordered_map<LuaParameter::Type, std::string> parameterValueFunctions;
-	parameterValueFunctions[LuaParameter::Type::String] = "lua_tostring";
-	parameterValueFunctions[LuaParameter::Type::Number] = "lua_tonumber";
-	parameterValueFunctions[LuaParameter::Type::UserData] = "lua_touserdata";
-
-	return parameterValueFunctions;
-}
-
-static std::string generateCParameter(const LuaParameter &parameter, bool out) {
-	std::stringstream stringStream;
-	std::unordered_map<LuaParameter::Type, std::string> parameterTypeStrings;
-
-	parameterTypeStrings[LuaParameter::Type::Number] = "double";
-	parameterTypeStrings[LuaParameter::Type::String] = "const char *";
-	parameterTypeStrings[LuaParameter::Type::UserData] = "void *";
-	const std::string &typeString = parameterTypeStrings.at(parameter.type);
-
-	if (typeString.back() != '*') { // ensure the pointer is right next to the identifier
-		stringStream << " ";
-	}
-	if (out) {
-		stringStream << "*";		// all "out parameters" are set via pointers
-	}
-	stringStream << parameter.name;
-
-	stringStream << typeString;
-
-	return stringStream.str();
-}	
-
-static std::string generateCParameterInstance(const LuaParameter &parameter, bool pointer) {
-	std::stringstream stringStream;
-	
-	std::unordered_map<LuaParameter::Type, std::string> parameterTypeStrings = parameterTypeToCParameterStringMap();
-	
-	const std::string &typeString = (parameter.type == LuaParameter::Type::Table) ?
-		parameter.typeName : parameterTypeStrings.at(parameter.type);
-
-	stringStream << typeString;
-
-	if (typeString.back() != '*') { // ensure the pointer is right next to the identifier
-		stringStream << " ";
-	}
-	if (pointer) {
-		stringStream << "*";		// all "out parameters" are set via pointers
-	}
-
-	stringStream << parameter.name;
-
-	return stringStream.str();
-}
-
-static std::string generateCParameterList(const std::vector<LuaParameter> &parameters, bool out) {
-	std::stringstream stringStream;	
-
-	for (auto &param : parameters) {
-		stringStream << generateCParameterInstance(param, out);
-
-		if (&param != &parameters.back()) { // only add a comma if there are more parameters to write
-			stringStream << ", ";
-		}
-
-	}
-
-	return stringStream.str();
-}
-
 inline static const std::string generateFunctionPointerTypeName(const std::string &functionName) {
 	return "AB_" + functionName;
-}
-
-inline static const std::string generateRegisterFunctionsPrototype(const std::string &moduleName) {
-	return "void AB_registerModule_" + moduleName + "(lua_State *L)";
 }
 
 inline static const std::string generateFunctionPointerVariableName(const std::string &functionName) {
@@ -122,10 +16,6 @@ inline static const std::string generateBindingFunctionName(const std::string &f
 	return "l_" + functionName;
 }
 
-inline static const std::string generateBindingFunctionPrototype(const std::string &functionName) {
-	return "int " + generateBindingFunctionName(functionName) + "(lua_State *L)";
-}
-
 inline static const std::string generateCustomToFunctionName(const std::string &typeName) {
 	return "AB_to_" + typeName;
 }
@@ -134,237 +24,15 @@ inline static const std::string generateCustomPushFunctionName(const std::string
 	return "AB_push_" + typeName;
 }
 
-inline static const std::string generateCustomGetterFunctionPrototype(const std::string &typeName) {
-	return "int " + generateCustomToFunctionName(typeName) + "(lua_State *L, int index, " + typeName + " *to)";
+const std::string BindingGenerator::getLuaTypeString(const LuaParameter &param) const {
+	switch(param.type) {
+		case LuaParameter::Type::Number: return "number";
+		case LuaParameter::Type::String: return "string";
+		case LuaParameter::Type::UserData: return "userdata";
+		case LuaParameter::Type::Table: return "table";
+	}
+	return "error";
 }
-
-inline static const std::string generateIndentation(int indentation) {
-	std::string indentationString;
-	for(int i = 0; i < indentation; i++) {
-		indentationString += "\t";
-	}
-	return indentationString;
-}
-
-static void writeFunctionPointerTypes(
-	const std::vector<LuaFunctionSpec> &functionSpecs,
-	std::stringstream &stringStream) {
-	
-	for (auto &fs : functionSpecs) {
-		stringStream << "typedef int (*" << generateFunctionPointerTypeName(fs.getName()) << ")";
-		stringStream << "(" << generateCParameterList(fs.getParametersIn(), false);
-		if (!fs.getParametersOut().empty()) {
-			if (!fs.getParametersIn().empty()) {
-				stringStream << ", ";
-			}
-			stringStream << generateCParameterList(fs.getParametersOut(), true);
-		}
-
-		stringStream << ");" << std::endl;
-	}
-}
-
-
-static void writeIfTypeCorrectGet(const LuaParameter &param, int stackIndex, std::stringstream &stringStream, int indentationLevel) {
-	std::unordered_map<LuaParameter::Type, std::string> parameterCheckTypeFunctions = getParameterTypeCheckFunctions();
-	std::unordered_map<LuaParameter::Type, std::string> parameterValueFunctions = getParameterValueFunctions();
-	std::unordered_map<LuaParameter::Type, std::string> luaParameterTypes = parameterTypeToLuaParameterStringMap();
-	std::string indentation = generateIndentation(indentationLevel);
-	// Generates an if-statement checking the type of the parameter
-	stringStream << indentation << "if (" << parameterCheckTypeFunctions.at(param.type) << "(L, "
-		<< stackIndex << ")) {" << std::endl;
-
-	// Generates the code retrieving the parameter from the lua stack
-	stringStream << indentation << "\t" << param.name << " = " << parameterValueFunctions.at(param.type)
-		<< "(L, " << stackIndex << ");" << std::endl;
-	
-	stringStream << indentation << "}" << std::endl;
-}
-
-static void writeBindingImplementation(const LuaFunctionSpec &functionSpec, std::stringstream &stringStream) {
-	std::unordered_map<LuaParameter::Type, std::string> 
-		parameterTypeStrings = parameterTypeToCParameterStringMap();
-
-	std::unordered_map<LuaParameter::Type, std::string>
-		luaParameterTypes = parameterTypeToLuaParameterStringMap();
-
-	std::unordered_map<LuaParameter::Type, std::string> parameterCheckTypeFunctions = getParameterTypeCheckFunctions();
-	std::unordered_map<LuaParameter::Type, std::string> parameterValueFunctions = getParameterValueFunctions();
-
-	std::unordered_map<LuaParameter::Type, std::string> luaPushValueFunctions;
-	luaPushValueFunctions[LuaParameter::Type::Number] = "lua_pushnumber";
-	luaPushValueFunctions[LuaParameter::Type::String] = "lua_pushstring";
-	luaPushValueFunctions[LuaParameter::Type::UserData] = "lua_pushlightuserdata";
-
-	stringStream << "static " << generateBindingFunctionPrototype(functionSpec.getName()) << " {" << std::endl;
-
-	const std::vector<LuaParameter> inParams = functionSpec.getParametersIn();
-	const std::vector<LuaParameter> outParams = functionSpec.getParametersOut();
-	
-	for (auto inParam : inParams) {
-		stringStream << '\t' << generateCParameterInstance(inParam, false) << ';' << std::endl;
-	}
-
-	stringStream << std::endl;
-
-	for (auto outParam : outParams) {
-		stringStream << '\t' << generateCParameterInstance(outParam, false) << ';' << std::endl;
-	}
-
-	stringStream << std::endl;
-
-	// Generates code checking the types for the in parameters on the lua stack
-	// as well as retriving them if the type is correct
-	for (int i = inParams.size() - 1; i >= 0; i--) {
-		
-		// TODO: Remove this and fix instead
-
-
-		int luaIndex = -(inParams.size() - i);
-		if(inParams[i].type == LuaParameter::Type::Table) {
-			stringStream << "\t" << "if(lua_istable(L, " << luaIndex << ")) {" << std::endl;
-			stringStream << "\t\t" << "if(!" << generateCustomToFunctionName(inParams[i].typeName) << "(L, " << luaIndex << ", &" << inParams[i].name << ")) {" << std::endl;
-			stringStream << "\t\t\t" << "return luaL_error(L, \"Error loading custom type " << inParams[i].typeName << "\");" << std::endl;
-			stringStream << "\t\t" << "}" << std::endl;
-			stringStream << "\t" << "}" << std::endl;
-		}
-		else {
-			writeIfTypeCorrectGet(inParams[i], luaIndex, stringStream, 1);
-		}
-		// Generates the code that determines what happens if a parameter of an incorrect
-		// type was passed to the runtime.
-		stringStream << "\t" << "else {" << std::endl;
-		stringStream << "\t" << "\t" << "return luaL_error(L, \"Incorrect type for parameter " <<
-		inParams[i].name << ". Expected type was " << luaParameterTypes.at(inParams[i].type) << ".\");" << std::endl;
-
-		stringStream << "\t" << "}" << std::endl << std::endl;
-	}
-
-	std::string functionPointerName = generateFunctionPointerVariableName(functionSpec.getName());
-
-	// Generates the code which calling the bound function in the runtime, if there is one.
-	stringStream << "\t" << "if (" << functionPointerName << ") {" << std::endl;
-	stringStream << "\t\t" << "if (!" << generateFunctionPointerVariableName(functionSpec.getName());
-	stringStream << "(";
-
-	for (auto &param : inParams) {
-		stringStream << param.name;
-		if (&param != &inParams.back()) {
-			stringStream << ", ";
-		}
-	}
-
-	if (!outParams.empty()) {
-		if(!inParams.empty()) {
-			stringStream << ", ";
-		}
-
-		for (auto &param : outParams) {
-			stringStream << "&" << param.name;
-
-			if (&param != &outParams.back()) {
-				stringStream << ", ";
-			}
-		}
-	}
-
-	stringStream << ")) {" << std::endl;
-
-	stringStream << "\t\t\t" << "return luaL_error(L, \"Runtime error: " << functionSpec.getName() 
-		<< " failed for unknown reason!\");" << std::endl;
-	stringStream << "\t\t}" << std::endl;
-	stringStream << "\t" << "}" << std::endl;
-	stringStream << "\t" << "else {" << std::endl;
-	stringStream << "\t\t" << "return luaL_error(L, \"Runtime error: " << functionSpec.getName() 
-		<< " wasn't bound!\");" << std::endl;
-	stringStream << "\t" << "}" << std::endl;
-	stringStream << std::endl;
-
-	// Generates the code pushing the results 
-	for (auto &param : outParams) {
-		const std::string &luaPushValueFunction = luaPushValueFunctions.at(param.type);
-		stringStream << "\t" << luaPushValueFunction << "(L, " << param.name << ");" << std::endl;
-	}
-
-	stringStream << std::endl;
-	stringStream << "\t" << "return " << outParams.size() << ";" << std::endl;
-
-	stringStream << "}" << std::endl;
-}
-
-static void writeBindingImplementations(const std::vector<LuaFunctionSpec> &functionSpecs, std::stringstream &stringStream) {
-	for (auto &fs : functionSpecs) {
-		writeBindingImplementation(fs, stringStream);
-		stringStream << std::endl;
-		if (&fs != &functionSpecs.back()) {
-			stringStream << std::endl;
-		}
-	}
-}
-
-static void writeCustomType(const StructSpec &structSpecification, std::stringstream &stringStream) {
-	stringStream << "typedef struct " << structSpecification.getName() << " {" << std::endl;
-	for(const auto &member : structSpecification.getMembers()) {
-		
-		stringStream << "\t";
-		stringStream << generateCParameterInstance(member, false) << ";" << std::endl;
-		
-	}
-	stringStream << "}" << structSpecification.getName() << ";" << std::endl;
-}
-
-static void writeCustomTypes(const std::vector<StructSpec> &structSpecifications, std::stringstream &stringStream) {
-
-	for(const auto &structSpec : structSpecifications) {
-		writeCustomType(structSpec, stringStream);
-		stringStream << std::endl;
-	}
-}
-
-
-static void writeCustomGetters(const std::vector<StructSpec> &structSpecifications, std::stringstream &stringStream) {
-	const std::unordered_map<LuaParameter::Type, std::string> &parameterTypeCheckFunctions = getParameterTypeCheckFunctions();
-	const std::unordered_map<LuaParameter::Type, std::string> &parameterValueFunctions = getParameterValueFunctions();
-
-	for(auto &structSpec : structSpecifications) {
-		stringStream << generateCustomGetterFunctionPrototype(structSpec.getName()) << ";" << std::endl; 
-	}
-
-	stringStream << std::endl;
-	for(auto &structSpec : structSpecifications) {
-
-		stringStream << generateCustomGetterFunctionPrototype(structSpec.getName()) << " {" << std::endl;
-		for (auto &member : structSpec.getMembers()) {
-			stringStream << '\t' << generateCParameterInstance(member, false) << ';' << std::endl;
-		}
-
-		for(auto &member : structSpec.getMembers()) {
-			stringStream << "\tlua_getfield(L, index, " << "\"" << member.name << "\");" << std::endl;
-			
-			if(member.type == LuaParameter::Type::Table) {
-				stringStream << "\t" << "if (!" << generateCustomToFunctionName(member.typeName) << "(L, 1, &" << member.name << ")) {" << std::endl;
-				stringStream << "\t\t" << "lua_pop(L, 1);" << std::endl;
-				stringStream << "\t\t" << "return 0;" << std::endl;
-				stringStream << "\t" << "}" << std::endl;
-			}
-			else {
-				writeIfTypeCorrectGet(member, 1, stringStream, 1);
-				stringStream << "\t" << "else {" << std::endl;
-				stringStream << "\t\t" << "lua_pop(L, 1);" << std::endl;
-				stringStream << "\t\t" << "return 0;" << std::endl;
-				stringStream << "\t" << "}" << std::endl;
-			}
-			stringStream << "\t" << "to->" << member.name << " = " << member.name << ";" << std::endl;
-			stringStream << "\t" << "lua_pop(L, 1);" << std::endl;
-			stringStream << std::endl;
-		}
-		stringStream << std::endl;
-
-		stringStream << "\treturn 1;" << std::endl;
-		stringStream << "}" << std::endl << std::endl;
-	}
-}
-
 
 
 const CFunctionSpec BindingGenerator::getRegisterModuleFunction() const {
@@ -384,7 +52,7 @@ const CFunctionSpec BindingGenerator::getFunctionPointerSetterFunction(const Lua
 	std::vector<CParameter> cParams;
 	cParams.push_back(
 		CParameter(
-			functionPointerSetterParameterName,
+			"function",
 			CParameter::Type(
 				CParameter::Type::CType::NonPrimitive,
 				generateFunctionPointerTypeName(functionSpec.getName()),
@@ -483,6 +151,20 @@ const CFunctionSpec BindingGenerator::getBindingCallBackFunction(const LuaFuncti
 	);
 }
 
+const CParameter BindingGenerator::getBindingPointerVariable(const LuaFunctionSpec &functionSpec) const {
+	auto &functionPointerSetterSpec = getFunctionPointerSetterFunction(functionSpec);
+
+	return CParameter(
+		generateFunctionPointerVariableName(functionSpec.getName()),
+		CParameter::Type(
+			CParameter::Type::CType::NonPrimitive,
+			functionPointerSetterSpec.getInputParams()[0].getType().typeName,
+			0
+		)
+	);
+}
+
+
 const CFunctionSpec BindingGenerator::getBindingFunction(const LuaFunctionSpec &functionSpec) const {
 	std::vector<CParameter> cParams;
 
@@ -545,6 +227,7 @@ const CFunctionSpec BindingGenerator::getLuaCheckTypeFunction(const LuaParameter
 const CFunctionSpec BindingGenerator::getLuaToFunction(const LuaParameter &parameter) const {
 	std::string functionName = "error";
 	std::vector<CParameter> cParams;
+	const auto returnType = getCParameterTypeTranslation(parameter, false);
 
 	switch(parameter.type) {
 		case LuaParameter::Type::Number:
@@ -554,7 +237,7 @@ const CFunctionSpec BindingGenerator::getLuaToFunction(const LuaParameter &param
 			functionName = "lua_tostring";
 			break;
 		case LuaParameter::Type::UserData:
-			functionName = "lua_tolightuserdata";
+			functionName = "lua_touserdata";
 			break;
 		case LuaParameter::Type::Table:
 			functionName = generateCustomToFunctionName(parameter.typeName);
@@ -577,8 +260,9 @@ const CFunctionSpec BindingGenerator::getLuaToFunction(const LuaParameter &param
 
 	return CFunctionSpec(
 		functionName,
-		CParameter::Type(CParameter::Type::CType::Int, "", 0),
-		cParams
+		returnType,
+		cParams,
+		true
 	);
 }
 
@@ -642,6 +326,20 @@ const CFunctionSpec BindingGenerator::getLuaPushFunction(const CParameter::Type 
 	);
 }
 
+const CStruct BindingGenerator::getCStruct(const StructSpec &structSpec) const {
+	std::vector<CParameter> cParams;
+	for(auto &param : structSpec.getMembers()) {
+		CParameter::Type type = getCParameterTypeTranslation(param, false);
+		cParams.push_back(CParameter(param.name, type));
+	}
+
+	return CStruct(
+		structSpec.getName(),
+		cParams
+	);
+}
+
+
 const CFunctionSpec BindingGenerator::getLuaLErrorFunction() const {
 	std::vector<CParameter> cParams;
 	cParams.push_back(
@@ -665,19 +363,138 @@ const CFunctionSpec BindingGenerator::getLuaLErrorFunction() const {
 	);
 }
 
+const CFunctionSpec BindingGenerator::getLuaGetFieldFunction() const {
+	std::vector<CParameter> cParams;
+
+	cParams.push_back(
+		CParameter(
+			"L",
+			CParameter::Type(CParameter::Type::CType::NonPrimitive, "lua_State", 1)
+		)
+	);
+
+	cParams.push_back(
+		CParameter(
+			"index",
+			CParameter::Type(CParameter::Type::CType::Int, "", 0)
+		)
+	);
+
+	cParams.push_back(
+		CParameter(
+			"k",
+			CParameter::Type(CParameter::Type::CType::Char, "", 1)
+		)
+	);
+
+	return CFunctionSpec(
+		"lua_getfield",
+		CParameter::Type(CParameter::Type::CType::Int, "", 0),
+		cParams,
+		false
+	);
+}
+
+const CFunctionSpec BindingGenerator::getLuaPopFunction () const {
+	std::vector<CParameter> cParams;
+
+	cParams.push_back(
+		CParameter(
+			"L",
+			CParameter::Type(CParameter::Type::CType::NonPrimitive, "lua_State", 1)
+		)
+	);
+
+	cParams.push_back(
+		CParameter(
+			"n",
+			CParameter::Type(CParameter::Type::CType::Int, "", 0)
+		)
+	);
+
+	return CFunctionSpec(
+		"lua_pop",
+		CParameter::Type(CParameter::Type::CType::Void, "", 0),
+		cParams,
+		false
+	);
+}
+
+const CFunctionSpec BindingGenerator::getLuaCreateTableFunction() const {
+	std::vector<CParameter> cParams;
+
+	cParams.push_back(
+		CParameter(
+			"L",
+			CParameter::Type(CParameter::Type::CType::NonPrimitive, "lua_State", 1)
+		)
+	);
+
+	cParams.push_back(
+		CParameter(
+			"narr",
+			CParameter::Type(CParameter::Type::CType::Int, "", 0)
+		)
+	);
+
+	cParams.push_back(
+		CParameter(
+			"nrec",
+			CParameter::Type(CParameter::Type::CType::Int, "", 0)
+		)
+	);
+
+	return CFunctionSpec(
+		"lua_createtable",
+		CParameter::Type(CParameter::Type::CType::Void, "", 0),
+		cParams,
+		false
+	);
+}
+
+const CFunctionSpec BindingGenerator::getLuaSetTableFunction() const {
+	std::vector<CParameter> cParams;
+
+	cParams.push_back(
+		CParameter(
+			"L",
+			CParameter::Type(CParameter::Type::CType::NonPrimitive, "lua_State", 1)
+		)
+	);
+
+	cParams.push_back(
+		CParameter(
+			"index",
+			CParameter::Type(CParameter::Type::CType::Int, "", 0)
+		)
+	);
+
+	return CFunctionSpec(
+		"lua_settable",
+		CParameter::Type(CParameter::Type::CType::Void, "", 0),
+		cParams,
+		false
+	);
+}
+
 
 const std::string BindingGenerator::generateBindingInterface() const {
 	std::stringstream stream;
 
+	const auto &structSpecifications = m_autoBindFile.getStructSpecifications();
+
 	stream << "#include <lua.h>" << std::endl;
 	CodeWriter codeWriter(stream);
 
+	for(auto &sp : structSpecifications) {
+		auto cStruct = getCStruct(sp);
+		codeWriter.writeStruct(cStruct);
+		codeWriter.writeNewLine(2);
+	}
+
 	codeWriter.writeFunctionPrototype(getRegisterModuleFunction());
 	codeWriter.writeNewLine();
-	
-	writeCustomTypes(m_autoBindFile.getStructSpecifications(), stream);
-	stream << std::endl;
-	
+
 	for(auto &fs : m_autoBindFile.getFunctionSpecifications()) {
 		codeWriter.writeFunctionPointerTypeDef(getBindingCallBackFunction(fs));
 		codeWriter.writeNewLine();
@@ -697,24 +514,135 @@ const std::string BindingGenerator::generateBindingImplementation() const {
 	stream << "#include \"" << getInterfaceFileName() << "\"" << std::endl;
 	stream << "#include <lauxlib.h>" << std::endl;
 	stream << std::endl;
-	writeCustomGetters(m_autoBindFile.getStructSpecifications(), stream);
-	stream << std::endl;
 
 	auto &functionSpecifications = m_autoBindFile.getFunctionSpecifications();
+	auto &structSpecifications = m_autoBindFile.getStructSpecifications();
+
+	// Write binding function pointer variables
+	for(auto &fs : functionSpecifications) {
+		CParameter bindingVariable = getBindingPointerVariable(fs);
+		codeWriter.writeVariableInstance(bindingVariable, true);
+	}
+
+	codeWriter.writeNewLine();
+
+	// Write AB_to_X - function prototypes
+	for(auto &sp : structSpecifications) {
+		LuaParameter luaParam("", LuaParameter::Type::Table, sp.getName());
+		auto &cFunctionSpec = getLuaToFunction(luaParam);
+		codeWriter.writeFunctionPrototype(cFunctionSpec);
+		codeWriter.writeNewLine();
+	}
+
+	// Write AB_push_X - function prototypes
+	for(auto &sp : structSpecifications) {
+		LuaParameter luaParam("", LuaParameter::Type::Table, sp.getName());
+		auto &cParam = getCParameterTypeTranslation(luaParam, false);
+		auto &cFunctionSpec = getLuaPushFunction(cParam);
+		codeWriter.writeFunctionPrototype(cFunctionSpec);
+		codeWriter.writeNewLine();
+	}
+
+	codeWriter.writeNewLine();
+
+	// Write AB_to_x - function implementations
+	for(auto &sp : structSpecifications) {
+		LuaParameter luaParam("", LuaParameter::Type::Table, sp.getName());
+		auto &cFunctionSpec = getLuaToFunction(luaParam);
+
+		codeWriter.writeFunctionImplementation(cFunctionSpec, [&](){
+			std::string resultName = "result";
+			auto &luaGetField = getLuaGetFieldFunction();
+			auto &cStruct = getCStruct(sp);
+			codeWriter.writeVariableInstance(CParameter(resultName, cFunctionSpec.getReturnType()));
+			codeWriter.writeNewLine();
+
+			std::vector<std::string> getFieldArgs;
+			getFieldArgs.resize(3);
+			getFieldArgs[0] = cFunctionSpec.getInputParams()[0].getName();
+			getFieldArgs[1] = cFunctionSpec.getInputParams()[1].getName();
+			for(auto &member : sp.getMembers()) {
+				getFieldArgs[2] = '\"' + member.name + "\"";
+				codeWriter.writeFunctionCall(luaGetField, getFieldArgs, true);
+				codeWriter.writeNewLine();
+
+				auto &luaToFunction = getLuaToFunction(member);
+				std::vector<std::string> toFunctionArgs;
+				toFunctionArgs.resize(2);
+				toFunctionArgs[0] = cFunctionSpec.getInputParams()[0].getName();
+				toFunctionArgs[1] = "-1";
+				
+				codeWriter.writeVariableAssignment(resultName + "." + member.name, luaToFunction, toFunctionArgs);
+				codeWriter.writeNewLine();
+				std::vector<std::string> popFunctionArgs;
+				popFunctionArgs.resize(2);
+				popFunctionArgs[0] = cFunctionSpec.getInputParams()[0].getName();
+				popFunctionArgs[1] = "-1";
+
+				auto &luaPopFunction = getLuaPopFunction();
+				codeWriter.writeFunctionCall(luaPopFunction, popFunctionArgs, true);
+				codeWriter.writeNewLine();
+			}
+
+			codeWriter.writeNewLine();
+
+			codeWriter.writeReturnStatement([&codeWriter, &resultName](){
+				codeWriter.writeIdentifier(resultName);
+			});
+		});
+		codeWriter.writeNewLine(2);
+	}
+
+	// Write AB_push_X - function prototypes
+	for(auto &sp : structSpecifications) {
+		LuaParameter luaParam("", LuaParameter::Type::Table, sp.getName());
+		auto &cParam = getCParameterTypeTranslation(luaParam, false);
+		auto &cFunctionSpec = getLuaPushFunction(cParam);
+		codeWriter.writeFunctionImplementation(cFunctionSpec, [&cFunctionSpec, &codeWriter, &sp, this]{
+			auto &luaCreateTableFunction = getLuaCreateTableFunction();
+			std::vector<std::string> createTableArgs(3);
+			createTableArgs[0] = cFunctionSpec.getInputParams()[0].getName();
+			createTableArgs[1] = "0";
+			createTableArgs[2] = std::to_string(sp.getMembers().size());
+			
+			codeWriter.writeFunctionCall(luaCreateTableFunction, createTableArgs, true);
+			codeWriter.writeNewLine(2);
+			
+			std::vector<std::string> pushStringArgs(2);
+			std::vector<std::string> pushValueArgs(2);
+			std::vector<std::string> setTableArgs(2);
+
+			pushValueArgs[0] = cFunctionSpec.getInputParams()[0].getName();
+			pushStringArgs[0] = cFunctionSpec.getInputParams()[0].getName();
+
+			setTableArgs[0] = cFunctionSpec.getInputParams()[0].getName();
+			setTableArgs[1] = "-3";
+
+			auto &pushStringFunction = getLuaPushFunction(CParameter::Type(CParameter::Type::CType::Char, "", 1));
+			auto &members = sp.getMembers();
+			for(auto &member : members) {
+				auto &pushValueFunction = getLuaPushFunction(getCParameterTypeTranslation(member, false));
+				auto &setTableFunction = getLuaSetTableFunction();
+
+				pushStringArgs[1] = '\"' + member.name + '\"';
+				pushValueArgs[1] = cFunctionSpec.getInputParams()[1].getName() + "." + member.name;
+				codeWriter.writeFunctionCall(pushStringFunction, pushStringArgs, true);
+				codeWriter.writeNewLine();
+				codeWriter.writeFunctionCall(pushValueFunction, pushValueArgs, true);
+				codeWriter.writeNewLine();
+				codeWriter.writeFunctionCall(setTableFunction, setTableArgs, true);
+				if(&member != &members.back()) {
+					codeWriter.writeNewLine(2);
+				}
+			}
+		});
+		codeWriter.writeNewLine(2);
+	}
+
 	// Write function pointer setter implementations
 	for(auto &fs : functionSpecifications) {
 		auto &functionPointerSetterSpec = getFunctionPointerSetterFunction(fs);
-		
-		CParameter bindingVariable(
-			generateFunctionPointerVariableName(fs.getName()),
-			CParameter::Type(
-				CParameter::Type::CType::NonPrimitive,
-				functionPointerSetterSpec.getInputParams()[0].getType().typeName,
-				0
-			)
-		);
-
-		codeWriter.writeVariableInstance(bindingVariable, true);
+		CParameter bindingVariable = getBindingPointerVariable(fs);
 		codeWriter.writeFunctionImplementation(functionPointerSetterSpec, [&](){
 			codeWriter.writeVariableAssignment(
 				bindingVariable.getName(),
@@ -762,8 +690,8 @@ const std::string BindingGenerator::generateBindingImplementation() const {
 						std::vector<std::string> args;
 						args.push_back(bindingFunction.getInputParams()[0].getName());
 						args.push_back(
-							"\"Error: Wrong type of parameter " + inParams[i].name + "! " +
-							"Expected type was " + parameterTypeToLuaParameterStringMap().at(inParams[i].type) +
+							"\" Error: Wrong type of parameter " + inParams[i].name + "! " +
+							"Expected type was " + getLuaTypeString(inParams[i]) + 
 							"\""
 						);
 
@@ -779,9 +707,9 @@ const std::string BindingGenerator::generateBindingImplementation() const {
 			codeWriter.writeIfStatement(
 				[&]{
 					codeWriter.writeComparisonOperation(
-							[&]{ codeWriter.writeIdentifier(functionPointerName); },
-							[&]{ codeWriter.writeNull(); },
-							CodeWriter::ComparisonOperator::NotEqual
+						[&]{ codeWriter.writeIdentifier(functionPointerName); },
+						[&]{ codeWriter.writeNull(); },
+						CodeWriter::ComparisonOperator::NotEqual
 					);
 				},
 				[&]{
@@ -829,105 +757,9 @@ const std::string BindingGenerator::generateBindingImplementation() const {
 			codeWriter.writeReturnStatement([&outParams, &codeWriter]() {
 				codeWriter.writeIntegerLiteral(outParams.size());
 			});
-			/*
-			std::unordered_map<LuaParameter::Type, std::string> 
-				parameterTypeStrings = parameterTypeToCParameterStringMap();
-
-			std::unordered_map<LuaParameter::Type, std::string>
-				luaParameterTypes = parameterTypeToLuaParameterStringMap();
-
-			std::unordered_map<LuaParameter::Type, std::string> parameterCheckTypeFunctions = getParameterTypeCheckFunctions();
-			std::unordered_map<LuaParameter::Type, std::string> parameterValueFunctions = getParameterValueFunctions();
-
-			std::unordered_map<LuaParameter::Type, std::string> luaPushValueFunctions;
-			luaPushValueFunctions[LuaParameter::Type::Number] = "lua_pushnumber";
-			luaPushValueFunctions[LuaParameter::Type::String] = "lua_pushstring";
-			luaPushValueFunctions[LuaParameter::Type::UserData] = "lua_pushlightuserdata";
-
-			// Generates code checking the types for the in parameters on the lua stack
-			// as well as retriving them if the type is correct
-			for (int i = inParams.size() - 1; i >= 0; i--) {
-				
-				// TODO: Remove this and fix instead
-
-
-				int luaIndex = -(inParams.size() - i);
-				if(inParams[i].type == LuaParameter::Type::Table) {
-					stringStream << "\t" << "if(lua_istable(L, " << luaIndex << ")) {" << std::endl;
-					stringStream << "\t\t" << "if(!" << generateCustomToFunctionName(inParams[i].typeName) << "(L, " << luaIndex << ", &" << inParams[i].name << ")) {" << std::endl;
-					stringStream << "\t\t\t" << "return luaL_error(L, \"Error loading custom type " << inParams[i].typeName << "\");" << std::endl;
-					stringStream << "\t\t" << "}" << std::endl;
-					stringStream << "\t" << "}" << std::endl;
-				}
-				else {
-					writeIfTypeCorrectGet(inParams[i], luaIndex, stringStream, 1);
-				}
-				// Generates the code that determines what happens if a parameter of an incorrect
-				// type was passed to the runtime.
-				stringStream << "\t" << "else {" << std::endl;
-				stringStream << "\t" << "\t" << "return luaL_error(L, \"Incorrect type for parameter " <<
-				inParams[i].name << ". Expected type was " << luaParameterTypes.at(inParams[i].type) << ".\");" << std::endl;
-
-				stringStream << "\t" << "}" << std::endl << std::endl;
-			}
-
-			std::string functionPointerName = generateFunctionPointerVariableName(functionSpec.getName());
-
-			// Generates the code which calling the bound function in the runtime, if there is one.
-			stringStream << "\t" << "if (" << functionPointerName << ") {" << std::endl;
-			stringStream << "\t\t" << "if (!" << generateFunctionPointerVariableName(functionSpec.getName());
-			stringStream << "(";
-
-			for (auto &param : inParams) {
-				stringStream << param.name;
-				if (&param != &inParams.back()) {
-					stringStream << ", ";
-				}
-			}
-
-			if (!outParams.empty()) {
-				if(!inParams.empty()) {
-					stringStream << ", ";
-				}
-
-				for (auto &param : outParams) {
-					stringStream << "&" << param.name;
-
-					if (&param != &outParams.back()) {
-						stringStream << ", ";
-					}
-				}
-			}
-
-			stringStream << ")) {" << std::endl;
-
-			stringStream << "\t\t\t" << "return luaL_error(L, \"Runtime error: " << functionSpec.getName() 
-				<< " failed for unknown reason!\");" << std::endl;
-			stringStream << "\t\t}" << std::endl;
-			stringStream << "\t" << "}" << std::endl;
-			stringStream << "\t" << "else {" << std::endl;
-			stringStream << "\t\t" << "return luaL_error(L, \"Runtime error: " << functionSpec.getName() 
-				<< " wasn't bound!\");" << std::endl;
-			stringStream << "\t" << "}" << std::endl;
-			stringStream << std::endl;
-
-			// Generates the code pushing the results 
-			for (auto &param : outParams) {
-				const std::string &luaPushValueFunction = luaPushValueFunctions.at(param.type);
-				stringStream << "\t" << luaPushValueFunction << "(L, " << param.name << ");" << std::endl;
-			}
-
-			stringStream << std::endl;
-			stringStream << "\t" << "return " << outParams.size() << ";" << std::endl;
-
-			stringStream << "}" << std::endl;
-			*/
 		});
-		codeWriter.writeNewLine();
+		codeWriter.writeNewLine(2);
 	}
-
-	//writeBindingImplementations(functionSpecifications, stream);
-	//stream << std::endl;
 
 	codeWriter.writeFunctionImplementation(getRegisterModuleFunction(), [&, this](){
 		auto &luaRegisterFunction = this->getLuaRegisterFunction();

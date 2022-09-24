@@ -44,6 +44,7 @@ void CodeWriter::writeCParameter(const CParameter &parameter, bool isStatic) {
 }
 
 void CodeWriter::writeVariableInstance(const CParameter &parameter, bool isStatic) {
+    m_stringStream << generateIndentationString();
     writeCParameter(parameter, isStatic);
     m_stringStream << ";" << std::endl;
 }
@@ -77,6 +78,20 @@ void CodeWriter::writeParameterList(const std::vector<CParameter> &parameters) {
         }
     }
 }
+
+void CodeWriter::writeStruct(const CStruct &cStruct) {
+    setIndentationLevel(0);
+    m_stringStream << "typedef struct " << cStruct.getName() << " {";
+    writeNewLine();
+    setIndentationLevel(1);
+    for(auto &param : cStruct.getMembers()) {
+        m_stringStream << generateIndentationString();
+        writeVariableInstance(param, false);
+    }
+    setIndentationLevel(0);
+    m_stringStream << "}" << cStruct.getName() << ";";
+}
+
 
 void CodeWriter::writeFunctionCall(const CFunctionSpec &functionSpec, const std::vector<std::string> &args, bool atomically) {
     assert(functionSpec.getInputParams().size() == args.size());
@@ -119,8 +134,6 @@ void CodeWriter::writeFunctionPointerCall(const std::string functionPointerName,
         m_stringStream << ";";
     }
 }
-
-
 
 void CodeWriter::writeFunctionPrototype(const CFunctionSpec &functionSpec) {
     writeFunctionHeader(functionSpec);
@@ -189,7 +202,6 @@ void CodeWriter::writeInstantiateParameters(const std::vector<CParameter> &param
         }
     }
 }
-
 
 void CodeWriter::writeFunctionPointerTypeDef(const CFunctionSpec &functionSpec) {
     m_stringStream << "typedef ";
