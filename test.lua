@@ -1,4 +1,7 @@
-window = nil
+---@module 'App-lib'
+---@module 'Draw-lib'
+
+local window = nil
 
 function init()
 	window = CreateWindow(800, 600, "test")
@@ -7,9 +10,9 @@ end
 
 function update()
 	Clear(0.1, 0.1, 0.1, 1.0)
-	seconds = GetSeconds()
-	x, y = GetMouseXY(window)
-	w, h = GetWindowDimensions(window);
+	local seconds = GetSeconds()
+	local x, y = GetMouseXY(window)
+	local w, h = GetWindowDimensions(window);
 	
 	SetDrawColor(0, 0, 1, 1)
 	DrawLine(0, 0, x, y, 10);
