@@ -25,7 +25,7 @@ int main() {
 
 	luaL_dofile(L, "test.lua");
 
-	lua_getglobal(L, "init");
+	lua_getglobal(L, "Init");
 	lua_pcall(L, 0, 0, 0);
 
 	appLoop(L);

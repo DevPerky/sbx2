@@ -102,7 +102,7 @@ void appLoop(lua_State *L) {
 			auto frameEnd = frameStart + std::chrono::microseconds((int)(1000000 / targetFPS));
 
 			glfwPollEvents();
-			lua_getglobal(L, "update");
+			lua_getglobal(L, "Update");
 			lua_pcall(L, 0, 0, 0);
 
 			glfwSwapBuffers(glfwWindow);

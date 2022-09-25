@@ -3,12 +3,12 @@
 
 local window = nil
 
-function init()
+function Init()
 	window = CreateWindow(800, 600, "test")
 	SetTargetFPS(90)
 end
 
-function update()
+function Update()
 	Clear(0.1, 0.1, 0.1, 1.0)
 	local seconds = GetSeconds()
 	local x, y = GetMouseXY(window)
