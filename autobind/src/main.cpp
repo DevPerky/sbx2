@@ -6,13 +6,14 @@
 
 int main(int argc, const char **argv) {
 	
-	if (argc <= 2) {
+	if (argc <= 3) {
 
 		std::cout << "[Autobind] error: not enough arguments supplied!" << std::endl;
 	}
 
 	std::string inputFile(argv[1]);
 	std::string outputFolder(argv[2]);
+	std::string luaDefinitionsFolder(argv[3]);
 
 	std::string outputImplementationFile, outputInterfaceFile;
 
