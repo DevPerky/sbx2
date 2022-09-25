@@ -41,6 +41,11 @@ void DefinitionsGenerator::writeAnnotation(const AnnotationType annotationType, 
     case AnnotationType::Return:
         argCount = 2;
         annotationString = "return";
+        break;
+    case AnnotationType::Meta:
+        argCount = 0;
+        annotationString = "meta";
+        break;
     }
 
     m_stringStream << annotationString << " ";
@@ -98,6 +103,7 @@ const std::string DefinitionsGenerator::generateDefinitions() {
     m_stringStream.clear();
     auto &structSpecifications = m_autoBindFile.getStructSpecifications();
     auto &functionSpecifications = m_autoBindFile.getFunctionSpecifications();
+    writeAnnotation(AnnotationType::Meta);
     
     for(auto &ss : structSpecifications) {
         writeClassDefinition(ss);

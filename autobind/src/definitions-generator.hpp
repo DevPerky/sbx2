@@ -11,7 +11,8 @@ private:
         Class,
         Field,
         Param,
-        Return
+        Return,
+        Meta
     };
 
     const AutoBindFile &m_autoBindFile;
