@@ -8,18 +8,24 @@
 class DefinitionsGenerator {
 private:
     enum class AnnotationType {
-        Class
+        Class,
+        Field,
+        Param,
+        Return
     };
 
     const AutoBindFile &m_autoBindFile;
     std::stringstream m_stringStream;
     void writeAnnotation(const AnnotationType annotationType, ...);
     void writeClassDefinition(const StructSpec &structSpec);
+    void writeFunctionDefinition(const LuaFunctionSpec &functionSpec);
+    const std::string getLuaTypeName(const LuaParameter &luaParameter);
 public:
     inline DefinitionsGenerator(const AutoBindFile &autoBindFile) 
         : m_autoBindFile(autoBindFile) {}
 
-    const std::string generateDefinitions();    
+    const std::string generateDefinitions();
+    const std::string getDefinitionsFileName() const;
 };
 
 
