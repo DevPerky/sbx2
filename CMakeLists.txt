@@ -33,6 +33,7 @@ add_executable(autobind
     autobind/src/autobind-file.cpp
     autobind/src/binding-generator.cpp
     autobind/src/code-writer.cpp
+    autobind/src/definitions-generator.cpp
 )
 
 target_link_libraries(sbx lua_static)
