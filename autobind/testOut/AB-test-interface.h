@@ -1,4 +1,8 @@
+#ifndef AB_TEST_H
+#define AB_TEST_H
+
 #include <lua.h>
+
 typedef struct Test {
 	double testNumber;
 	const char *testString;
@@ -18,3 +22,4 @@ typedef int (*AB_testIntegers)(lua_Integer integerIn, lua_Integer *integerOut);
 typedef int (*AB_customTypeIn)(Test customParam, const char *stringParam, const char **outString, Test *customParamOut);
 void AB_bind_testIntegers(AB_testIntegers function);
 void AB_bind_customTypeIn(AB_customTypeIn function);
+#endif

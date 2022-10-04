@@ -1,4 +1,8 @@
+#ifndef AB_APP_H
+#define AB_APP_H
+
 #include <lua.h>
+
 void AB_registerModule_App(lua_State *L);
 typedef int (*AB_CreateWindow)(double width, double height, const char *title, void **window);
 typedef int (*AB_CloseWindow)(void *window);
@@ -12,3 +16,4 @@ void AB_bind_GetMouseXY(AB_GetMouseXY function);
 void AB_bind_GetWindowDimensions(AB_GetWindowDimensions function);
 void AB_bind_SetTargetFPS(AB_SetTargetFPS function);
 void AB_bind_GetSeconds(AB_GetSeconds function);
+#endif

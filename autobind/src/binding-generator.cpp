@@ -24,6 +24,15 @@ inline static const std::string generateCustomPushFunctionName(const std::string
 	return "AB_push_" + typeName;
 }
 
+inline static const std::string getUpperCaseString(const std::string &input) {
+	std::string upperCase;
+	upperCase.resize(input.size());
+	for(int i = 0; i < input.size(); i++) {
+		upperCase[i] = std::toupper(input[i]);
+	}
+	return upperCase;
+}
+
 const std::string BindingGenerator::getLuaTypeString(const LuaParameter &param) const {
 	switch(param.type) {
 		case LuaParameter::Type::Number: return "number";
@@ -495,11 +504,18 @@ const CFunctionSpec BindingGenerator::getLuaSetTableFunction() const {
 
 const std::string BindingGenerator::generateBindingInterface() const {
 	std::stringstream stream;
+	CodeWriter codeWriter(stream);
 
 	const auto &structSpecifications = m_autoBindFile.getStructSpecifications();
+	const std::string includeGuard = "AB_" + getUpperCaseString(m_autoBindFile.getModuleName()) + "_H"; 
+	stream << "#ifndef " << includeGuard << std::endl;
+	stream << "#define " << includeGuard << std::endl;
+
+	codeWriter.writeNewLine(1);
 
 	stream << "#include <lua.h>" << std::endl;
-	CodeWriter codeWriter(stream);
+
+	codeWriter.writeNewLine(1);
 
 	for(auto &sp : structSpecifications) {
 		auto cStruct = getCStruct(sp);
@@ -520,6 +536,7 @@ const std::string BindingGenerator::generateBindingInterface() const {
 		codeWriter.writeNewLine();
 	}
 
+	stream << "#endif" << std::endl;
 	return stream.str();
 }
 
