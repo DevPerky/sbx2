@@ -24,10 +24,6 @@ int main() {
 	drawInitialize(L);
 
 	luaL_dofile(L, "test.lua");
-
-	lua_getglobal(L, "Init");
-	lua_pcall(L, 0, 0, 0);
-
 	appLoop(L);
 	
     return 0;
