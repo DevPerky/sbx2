@@ -92,7 +92,7 @@ const CFunctionSpec BindingGenerator::getLuaRegisterFunction() const {
 }
 
 const CParameter::Type BindingGenerator::getCParameterTypeTranslation(const LuaParameter &param, bool out) const {
-	CParameter::Type::CType cType;
+	CParameter::Type::CType cType = CParameter::Type::CType::Invalid;
 	int pointerLevels = out ? 1 : 0;
 	std::string typeName = "";
 	bool isConst = false;
@@ -106,6 +106,10 @@ const CParameter::Type BindingGenerator::getCParameterTypeTranslation(const LuaP
 			cType = CParameter::Type::CType::Char;
 			isConst = true;
 			pointerLevels += 1;
+		break;
+
+		case LuaParameter::Type::Integer:
+			cType = CParameter::Type::CType::Int;
 		break;
 
 		case LuaParameter::Type::UserData:

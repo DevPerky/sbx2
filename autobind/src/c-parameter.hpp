@@ -11,7 +11,8 @@ public:
             Float,
             Double,
             Void,
-            Char
+            Char,
+            Invalid
         }const cType;
         const std::string typeName;
         const unsigned int pointerLevels;
