@@ -13,6 +13,12 @@
     </Members>
   </StructSpec>
 
+  <StructSpec name="TestIntegers">
+    <Members>
+      <Parameter type="integer" name="integer"/>
+    </Members>
+  </StructSpec>
+
   <FunctionSpec name="customTypeIn">
     <In>
       <Parameter type="Test" name="customParam"/>

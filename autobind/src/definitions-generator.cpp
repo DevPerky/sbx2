@@ -13,6 +13,7 @@ const std::string DefinitionsGenerator::getLuaTypeName(const LuaParameter &luaPa
         case LuaParameter::Type::Number: return "number";
         case LuaParameter::Type::String: return "string";
         case LuaParameter::Type::UserData: return "lightuserdata";
+        case LuaParameter::Type::Integer: return "integer";
         case LuaParameter::Type::Table: return luaParameter.typeName;
         
         default: return "error";
