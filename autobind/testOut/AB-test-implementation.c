@@ -1,6 +1,7 @@
 #include "AB-test-interface.h"
 #include <lauxlib.h>
 
+static AB_testIntegers AB_testIntegers_binding;
 static AB_customTypeIn AB_customTypeIn_binding;
 
 static Test AB_to_Test(lua_State *L, int index);
@@ -78,8 +79,33 @@ int AB_push_TestIntegers(lua_State *L, TestIntegers value) {
 	lua_settable(L, -3);
 }
 
+void AB_bind_testIntegers(AB_testIntegers function) {
+	AB_testIntegers_binding = function;
+}
+
 void AB_bind_customTypeIn(AB_customTypeIn function) {
 	AB_customTypeIn_binding = function;
+}
+
+static int l_testIntegers(lua_State *L) {
+	lua_Integer integerIn;
+	lua_Integer integerOut;
+
+	if(lua_isinteger(L, -1)) {
+		integerIn = lua_tointeger(L, -1);
+	}
+	else {
+		return luaL_error(L, " Error: Wrong type of parameter integerIn! Expected type was integer");
+	}
+
+	if(AB_testIntegers_binding != 0) {
+		if(AB_testIntegers_binding(integerIn, &integerOut) == 0) {
+			luaL_error(L, "Runtime error: testIntegers failed for some reason.");
+		}
+	}
+
+	lua_pushinteger(L, integerOut);
+	return 1;
 }
 
 static int l_customTypeIn(lua_State *L) {
@@ -114,5 +140,6 @@ static int l_customTypeIn(lua_State *L) {
 }
 
 void AB_registerModule_test(lua_State *L) {
+	lua_register(L, "testIntegers", l_testIntegers);
 	lua_register(L, "customTypeIn", l_customTypeIn);
 }

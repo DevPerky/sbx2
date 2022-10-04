@@ -19,6 +19,15 @@
     </Members>
   </StructSpec>
 
+  <FunctionSpec name="testIntegers">
+    <In>
+      <Parameter type="integer" name="integerIn"/>
+    </In>
+    <Out>
+      <Parameter type="integer" name="integerOut"/>
+    </Out>
+  </FunctionSpec>
+  
   <FunctionSpec name="customTypeIn">
     <In>
       <Parameter type="Test" name="customParam"/>

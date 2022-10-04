@@ -10,9 +10,11 @@ typedef struct Test2 {
 }Test2;
 
 typedef struct TestIntegers {
-	int integer;
+	lua_Integer integer;
 }TestIntegers;
 
 void AB_registerModule_test(lua_State *L);
+typedef int (*AB_testIntegers)(lua_Integer integerIn, lua_Integer *integerOut);
 typedef int (*AB_customTypeIn)(Test customParam, const char *stringParam, const char **outString, Test *customParamOut);
+void AB_bind_testIntegers(AB_testIntegers function);
 void AB_bind_customTypeIn(AB_customTypeIn function);
