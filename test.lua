@@ -9,35 +9,28 @@ local camera = {
 	viewPort = { top = 0, left = 0, right = 800, bottom = 600 }
 }
 
----@type integer
-local projectionMatrix = 0
-
 function OnWindowResize(width, height)
 	camera.viewPort.right = width
 	camera.viewPort.bottom = height
-	MatrixSetOrtho(projectionMatrix, camera.viewPort)
-	DrawSetViewport(camera.viewPort)
-	DrawSetProjectionMatrix(projectionMatrix)
+	SetDrawCamera(camera)
 end
 
 function Init()
-	SetTargetFPS(90)
 	window = CreateWindow(camera.viewPort.right, camera.viewPort.bottom, "test")
-	projectionMatrix = MatrixNew()
-	OnWindowResize(camera.viewPort.right, camera.viewPort.bottom)
-	print(projectionMatrix)
+	SetDrawCamera(camera)
+	SetTargetFPS(90)
 end
 
 function Update()
-	DrawClear(0.1, 0.1, 0.1, 1.0)
+	Clear(0.1, 0.1, 0.1, 1.0)
 	local seconds = GetSeconds()
 	local x, y = GetMouseXY(window)
 	local w, h = camera.viewPort.right, camera.viewPort.bottom
 	
-	DrawSetColor(0, 0, 1, 1)
+	SetDrawColor(0, 0, 1, 1)
 	DrawLine(0, 0, x, y, 10);
-	DrawSetColor(1, 0, 0, 1);
+	SetDrawColor(1, 0, 0, 1);
 	DrawRectangle(0, h-20, (seconds/60)*w, h)
-	DrawSetColor(0, 1, 0, 1);
+	SetDrawColor(0, 1, 0, 1);
 	DrawRectangle(x - 5, y - 5, x + 5, y + 5)
 end

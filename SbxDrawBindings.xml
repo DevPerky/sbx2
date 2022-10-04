@@ -22,33 +22,13 @@
         </Members>
     </StructSpec>
 
-
-    <FunctionSpec name="MatrixNew">
-        <Out>
-            <Parameter name="handle" type="integer"/>
-        </Out>
-    </FunctionSpec>
-
-    <FunctionSpec name="MatrixSetOrtho">
+    <FunctionSpec name="SetDrawCamera">
         <In>
-            <Parameter name="matrixHandle" type="integer"/>
-            <Parameter name="bounds" type="Rectangle"/>
-        </In>
-    </FunctionSpec>
-    
-    <FunctionSpec name="DrawSetViewport">
-        <In>
-            <Parameter name="bounds" type="Rectangle"/>
+            <Parameter name="camera" type="Camera"/>
         </In>
     </FunctionSpec>
 
-    <FunctionSpec name="DrawSetProjectionMatrix">
-        <In>
-            <Parameter name="matrixHandle" type="integer"/>
-        </In>
-    </FunctionSpec>
-
-    <FunctionSpec name="DrawSetColor">
+    <FunctionSpec name="SetDrawColor">
         <In>
             <Parameter name="red" type="number"/>
             <Parameter name="green" type="number"/>
@@ -76,7 +56,7 @@
         </In>
     </FunctionSpec>    
 
-    <FunctionSpec name="DrawClear">
+    <FunctionSpec name="Clear">
         <In>
             <Parameter name="red" type="number"/>
             <Parameter name="green" type="number"/>
