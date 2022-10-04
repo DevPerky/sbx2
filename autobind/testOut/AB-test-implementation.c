@@ -5,8 +5,10 @@ static AB_customTypeIn AB_customTypeIn_binding;
 
 static Test AB_to_Test(lua_State *L, int index);
 static Test2 AB_to_Test2(lua_State *L, int index);
+static TestIntegers AB_to_TestIntegers(lua_State *L, int index);
 int AB_push_Test(lua_State *L, Test value);
 int AB_push_Test2(lua_State *L, Test2 value);
+int AB_push_TestIntegers(lua_State *L, TestIntegers value);
 
 static Test AB_to_Test(lua_State *L, int index) {
 	Test result;
@@ -34,6 +36,16 @@ static Test2 AB_to_Test2(lua_State *L, int index) {
 	return result;
 }
 
+static TestIntegers AB_to_TestIntegers(lua_State *L, int index) {
+	TestIntegers result;
+
+	lua_getfield(L, index, "integer");
+	result.integer = lua_tointeger(L, -1);
+	lua_pop(L, 1);
+
+	return result;
+}
+
 int AB_push_Test(lua_State *L, Test value) {
 	lua_createtable(L, 0, 3);
 
@@ -55,6 +67,14 @@ int AB_push_Test2(lua_State *L, Test2 value) {
 
 	lua_pushstring(L, "customParam");
 	AB_push_Test(L, value.customParam);
+	lua_settable(L, -3);
+}
+
+int AB_push_TestIntegers(lua_State *L, TestIntegers value) {
+	lua_createtable(L, 0, 1);
+
+	lua_pushstring(L, "integer");
+	lua_pushinteger(L, value.integer);
 	lua_settable(L, -3);
 }
 
