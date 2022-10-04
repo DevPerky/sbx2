@@ -1,6 +1,8 @@
 #include "draw.hpp"
 #include <glm/gtx/perpendicular.hpp>
 #include <glm/vec2.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 extern "C" {
 #include "AB-Draw-interface.h"
@@ -59,10 +61,32 @@ static int SetDrawColor(double red, double green, double blue, double alpha) {
     return 1;
 }
 
+static int SetDrawCamera(Camera camera) {
+    glm::mat4 projection = glm::ortho(
+        camera.viewPort.left,
+        camera.viewPort.right,
+        camera.viewPort.bottom,
+        camera.viewPort.top
+    );
+
+    glMatrixMode(GL_PROJECTION_MATRIX);
+    glLoadMatrixf(glm::value_ptr(projection));
+    glViewport(camera.viewPort.left, camera.viewPort.top, camera.viewPort.right, camera.viewPort.bottom);
+    return 1;
+}
+
 void drawInitialize(lua_State *L) {
+    /*
+    Camera drawCamera;
+    drawCamera.position = { 0, 0 };
+    drawCamera.viewPort = { 0, 0, 1, 1 };
+    SetDrawCamera(drawCamera);
+    */
+   
     AB_registerModule_Draw(L);
     AB_bind_DrawRectangle(DrawRectangle);
     AB_bind_Clear(Clear);
     AB_bind_SetDrawColor(SetDrawColor);
     AB_bind_DrawLine(DrawLine);
+    AB_bind_SetDrawCamera(SetDrawCamera);
 }

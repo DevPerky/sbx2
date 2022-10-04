@@ -2,6 +2,7 @@
 #include <thread>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 
 extern "C" {
 #include <GLFW/glfw3.h>
@@ -19,7 +20,7 @@ static int CreateWindow(double width, double height, const char *title, void **w
 	}
 
 	glfwWindow = glfwCreateWindow((int)width, (int)height, title, NULL, NULL);
-	
+	glfwMakeContextCurrent(glfwWindow);
 	*windowOut = glfwWindow;
 
 	return glfwWindow != 0;
@@ -88,22 +89,45 @@ void appInitialize(lua_State *L) {
 	AB_bind_GetWindowDimensions(GetWindowDimensions);
 }
 
-void appLoop(lua_State *L) {
-    if (glfwWindow != NULL) {
-		glfwMakeContextCurrent(glfwWindow);
-		int winWidth, winHeight;
-		glfwGetWindowSize(glfwWindow, &winWidth, &winHeight);
-		auto projection = glm::ortho((float)0, (float)winWidth, (float)winHeight, (float)0);
-		glMatrixMode(GL_PROJECTION_MATRIX);
-		glLoadMatrixf(value_ptr(projection));
+static void glfwWindowResizeCallback(GLFWwindow *window, int width, int height) {
+	lua_State *L = (lua_State*)glfwGetWindowUserPointer(window);
+	int resizeFunctionType = lua_getglobal(L, "OnWindowResize");
+	if(resizeFunctionType == LUA_TFUNCTION) {
+		lua_pushnumber(L, width);
+		lua_pushnumber(L, height);
+		lua_pcall(L, 2, 0, 0);
+	}
+	else {
+		lua_pop(L, 1);
+	}
 
+}
+
+void appLoop(lua_State *L) {
+	
+	if(lua_getglobal(L, "Init") != LUA_TFUNCTION) {
+		std::cout << "Couldn't find the function Init, exiting." << std::endl;
+		return;
+	}	
+	lua_pcall(L, 0, 0, 0);
+    
+	if (glfwWindow != NULL) {
+		glfwSetWindowUserPointer(glfwWindow, (void*)L);
+		glfwSetFramebufferSizeCallback(glfwWindow, glfwWindowResizeCallback);
+		
 		while (!glfwWindowShouldClose(glfwWindow)) {
 			auto frameStart = std::chrono::high_resolution_clock::now();
 			auto frameEnd = frameStart + std::chrono::microseconds((int)(1000000 / targetFPS));
 
 			glfwPollEvents();
-			lua_getglobal(L, "Update");
-			lua_pcall(L, 0, 0, 0);
+			int updateFunctionType = lua_getglobal(L, "Update");
+
+			if(updateFunctionType == LUA_TFUNCTION) {
+				lua_pcall(L, 0, 0, 0);
+			}
+			else {
+				lua_pop(L, 1);
+			}
 
 			glfwSwapBuffers(glfwWindow);
 			std::this_thread::sleep_until(frameEnd);
