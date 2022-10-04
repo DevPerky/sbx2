@@ -3,14 +3,11 @@
 #include <glm/vec2.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "handle.hpp"
 
 extern "C" {
 #include "AB-Draw-interface.h"
 #include <GLFW/glfw3.h>
 }
-
-static HandleBoundArray<glm::mat4> drawMatrices(10, [](){ return glm::mat4(1); });
 
 static int DrawRectangle(double left, double top, double right, double bot) {
     glBegin(GL_TRIANGLES);
@@ -51,48 +48,30 @@ static int DrawLine(double xFrom, double yFrom, double xTo, double yTo, double w
     return 1;
 }
 
-static int DrawClear(double red, double green, double blue, double alpha) {
+static int Clear(double red, double green, double blue, double alpha) {
     glClearColor(red, green, blue, alpha);
     glClear(GL_COLOR_BUFFER_BIT);
 
     return 1;
 }
 
-static int DrawSetColor(double red, double green, double blue, double alpha) {
+static int SetDrawColor(double red, double green, double blue, double alpha) {
     glColor4f(red, green, blue, alpha);
 
     return 1;
 }
 
-static int MatrixNew(lua_Integer *handle) {
-    uint32_t matrixHandle = drawMatrices.allocateHandle();
-    *handle = (lua_Integer)(matrixHandle);
-    return 1;
-}
-
-static int MatrixSetOrtho(lua_Integer handle, Rectangle bounds) {
-    glm::mat4 *matrix = drawMatrices.get((uint32_t)handle);
-    if(matrix == nullptr) {
-        return 0;
-    }
-    *matrix = glm::ortho(bounds.left, bounds.right, bounds.bottom, bounds.top);
-    return 1;
-}
-
-static int DrawSetProjectionMatrix(lua_Integer matrixHandle) {
-    glm::mat4 *matrix = drawMatrices.get((uint32_t)matrixHandle);
-    if(matrix == nullptr) {
-        return 0;
-    }
+static int SetDrawCamera(Camera camera) {
+    glm::mat4 projection = glm::ortho(
+        camera.viewPort.left,
+        camera.viewPort.right,
+        camera.viewPort.bottom,
+        camera.viewPort.top
+    );
 
     glMatrixMode(GL_PROJECTION_MATRIX);
-    glLoadMatrixf(glm::value_ptr(*matrix));
-
-    return 1;
-}
-
-static int DrawSetViewport(Rectangle bounds) {
-    glViewport(bounds.left, bounds.top, bounds.right, bounds.bottom);
+    glLoadMatrixf(glm::value_ptr(projection));
+    glViewport(camera.viewPort.left, camera.viewPort.top, camera.viewPort.right, camera.viewPort.bottom);
     return 1;
 }
 
@@ -106,11 +85,8 @@ void drawInitialize(lua_State *L) {
    
     AB_registerModule_Draw(L);
     AB_bind_DrawRectangle(DrawRectangle);
-    AB_bind_DrawClear(DrawClear);
-    AB_bind_DrawSetColor(DrawSetColor);
+    AB_bind_Clear(Clear);
+    AB_bind_SetDrawColor(SetDrawColor);
     AB_bind_DrawLine(DrawLine);
-    AB_bind_MatrixNew(MatrixNew);
-    AB_bind_MatrixSetOrtho(MatrixSetOrtho);
-    AB_bind_DrawSetProjectionMatrix(DrawSetProjectionMatrix);
-    AB_bind_DrawSetViewport(DrawSetViewport);
+    AB_bind_SetDrawCamera(SetDrawCamera);
 }

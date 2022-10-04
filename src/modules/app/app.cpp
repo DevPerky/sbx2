@@ -108,7 +108,7 @@ void appLoop(lua_State *L) {
 	if(lua_getglobal(L, "Init") != LUA_TFUNCTION) {
 		std::cout << "Couldn't find the function Init, exiting." << std::endl;
 		return;
-	}
+	}	
 	lua_pcall(L, 0, 0, 0);
     
 	if (glfwWindow != NULL) {
