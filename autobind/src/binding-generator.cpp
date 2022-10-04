@@ -251,6 +251,7 @@ const CFunctionSpec BindingGenerator::getLuaToFunction(const LuaParameter &param
 			break;
 		case LuaParameter::Type::Integer:
 			functionName = "lua_tointeger";
+			break;
 		case LuaParameter::Type::Table:
 			functionName = generateCustomToFunctionName(parameter.typeName);
 			break;
