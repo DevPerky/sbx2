@@ -108,7 +108,11 @@ void appLoop(lua_State *L) {
 	if(lua_getglobal(L, "Init") != LUA_TFUNCTION) {
 		std::cout << "Couldn't find the function Init, exiting." << std::endl;
 		return;
+<<<<<<< HEAD
 	}
+=======
+	}	
+>>>>>>> 2f6e953 (moves the initialization of the projection matrix)
 	lua_pcall(L, 0, 0, 0);
     
 	if (glfwWindow != NULL) {
