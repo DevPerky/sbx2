@@ -12,6 +12,7 @@ public:
             Double,
             Void,
             Char,
+            Lua_Integer,
             Invalid
         }const cType;
         const std::string typeName;

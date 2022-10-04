@@ -11,6 +11,7 @@ static const std::unordered_map<CParameter::Type::CType, std::string> cTypeStrin
     map[CParameter::Type::CType::Float] = "float";
     map[CParameter::Type::CType::Void] = "void";
     map[CParameter::Type::CType::Char] = "char";
+    map[CParameter::Type::CType::Lua_Integer] = "lua_Integer";
 
     return map;
 }

@@ -109,7 +109,7 @@ const CParameter::Type BindingGenerator::getCParameterTypeTranslation(const LuaP
 		break;
 
 		case LuaParameter::Type::Integer:
-			cType = CParameter::Type::CType::Int;
+			cType = CParameter::Type::CType::Lua_Integer;
 		break;
 
 		case LuaParameter::Type::UserData:
@@ -304,7 +304,7 @@ const CFunctionSpec BindingGenerator::getLuaPushFunction(const CParameter::Type 
 		case CParameter::Type::CType::Float:
 			setToPushNumber();
 			break;
-		case CParameter::Type::CType::Int:
+		case CParameter::Type::CType::Lua_Integer:
 			if(cType.pointerLevels == 0) {
 				functionName = "lua_pushinteger";
 			}
