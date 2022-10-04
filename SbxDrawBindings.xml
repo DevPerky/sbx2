@@ -1,4 +1,33 @@
 <Bindings module-name="Draw">
+    <StructSpec name="Vector2">
+        <Members>
+            <Parameter name="x" type="number"/>
+            <Parameter name="y" type="number"/>
+        </Members>
+    </StructSpec>
+
+    <StructSpec name="Rectangle">
+        <Members>
+            <Parameter name="left" type="number"/>
+            <Parameter name="top" type="number"/>
+            <Parameter name="right" type="number"/>
+            <Parameter name="bottom" type="number"/>
+        </Members>
+    </StructSpec>
+
+    <StructSpec name="Camera">
+        <Members>
+            <Parameter name="position" type="Vector2"/>
+            <Parameter name="viewPort" type="Rectangle"/>
+        </Members>
+    </StructSpec>
+
+    <FunctionSpec name="SetDrawCamera">
+        <In>
+            <Parameter name="camera" type="Camera"/>
+        </In>
+    </FunctionSpec>
+
     <FunctionSpec name="SetDrawColor">
         <In>
             <Parameter name="red" type="number"/>

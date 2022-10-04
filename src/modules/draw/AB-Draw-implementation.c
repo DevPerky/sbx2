@@ -1,11 +1,111 @@
 #include "AB-Draw-interface.h"
 #include <lauxlib.h>
 
+static AB_SetDrawCamera AB_SetDrawCamera_binding;
 static AB_SetDrawColor AB_SetDrawColor_binding;
 static AB_DrawRectangle AB_DrawRectangle_binding;
 static AB_DrawLine AB_DrawLine_binding;
 static AB_Clear AB_Clear_binding;
 
+static Vector2 AB_to_Vector2(lua_State *L, int index);
+static Rectangle AB_to_Rectangle(lua_State *L, int index);
+static Camera AB_to_Camera(lua_State *L, int index);
+int AB_push_Vector2(lua_State *L, Vector2 value);
+int AB_push_Rectangle(lua_State *L, Rectangle value);
+int AB_push_Camera(lua_State *L, Camera value);
+
+static Vector2 AB_to_Vector2(lua_State *L, int index) {
+	Vector2 result;
+
+	lua_getfield(L, index, "x");
+	result.x = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	lua_getfield(L, index, "y");
+	result.y = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+
+	return result;
+}
+
+static Rectangle AB_to_Rectangle(lua_State *L, int index) {
+	Rectangle result;
+
+	lua_getfield(L, index, "left");
+	result.left = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	lua_getfield(L, index, "top");
+	result.top = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	lua_getfield(L, index, "right");
+	result.right = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	lua_getfield(L, index, "bottom");
+	result.bottom = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+
+	return result;
+}
+
+static Camera AB_to_Camera(lua_State *L, int index) {
+	Camera result;
+
+	lua_getfield(L, index, "position");
+	result.position = AB_to_Vector2(L, -1);
+	lua_pop(L, 1);
+	lua_getfield(L, index, "viewPort");
+	result.viewPort = AB_to_Rectangle(L, -1);
+	lua_pop(L, 1);
+
+	return result;
+}
+
+int AB_push_Vector2(lua_State *L, Vector2 value) {
+	lua_createtable(L, 0, 2);
+
+	lua_pushstring(L, "x");
+	lua_pushnumber(L, value.x);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "y");
+	lua_pushnumber(L, value.y);
+	lua_settable(L, -3);
+}
+
+int AB_push_Rectangle(lua_State *L, Rectangle value) {
+	lua_createtable(L, 0, 4);
+
+	lua_pushstring(L, "left");
+	lua_pushnumber(L, value.left);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "top");
+	lua_pushnumber(L, value.top);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "right");
+	lua_pushnumber(L, value.right);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "bottom");
+	lua_pushnumber(L, value.bottom);
+	lua_settable(L, -3);
+}
+
+int AB_push_Camera(lua_State *L, Camera value) {
+	lua_createtable(L, 0, 2);
+
+	lua_pushstring(L, "position");
+	AB_push_Vector2(L, value.position);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "viewPort");
+	AB_push_Rectangle(L, value.viewPort);
+	lua_settable(L, -3);
+}
+
+void AB_bind_SetDrawCamera(AB_SetDrawCamera function) {
+	AB_SetDrawCamera_binding = function;
+}
 
 void AB_bind_SetDrawColor(AB_SetDrawColor function) {
 	AB_SetDrawColor_binding = function;
@@ -21,6 +121,25 @@ void AB_bind_DrawLine(AB_DrawLine function) {
 
 void AB_bind_Clear(AB_Clear function) {
 	AB_Clear_binding = function;
+}
+
+static int l_SetDrawCamera(lua_State *L) {
+	Camera camera;
+
+	if(lua_istable(L, -1)) {
+		camera = AB_to_Camera(L, -1);
+	}
+	else {
+		return luaL_error(L, " Error: Wrong type of parameter camera! Expected type was table");
+	}
+
+	if(AB_SetDrawCamera_binding != 0) {
+		if(AB_SetDrawCamera_binding(camera) == 0) {
+			luaL_error(L, "Runtime error: SetDrawCamera failed for some reason.");
+		}
+	}
+
+	return 0;
 }
 
 static int l_SetDrawColor(lua_State *L) {
@@ -204,6 +323,7 @@ static int l_Clear(lua_State *L) {
 }
 
 void AB_registerModule_Draw(lua_State *L) {
+	lua_register(L, "SetDrawCamera", l_SetDrawCamera);
 	lua_register(L, "SetDrawColor", l_SetDrawColor);
 	lua_register(L, "DrawRectangle", l_DrawRectangle);
 	lua_register(L, "DrawLine", l_DrawLine);
