@@ -9,6 +9,7 @@ class LuaParameter {
 			Number,
 			String,
 			UserData,
+			Integer,
 			Table
 		};
 

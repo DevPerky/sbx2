@@ -18,6 +18,8 @@ static LuaParameter parseParameterElement(const tinyxml2::XMLElement *parameterE
 	parameterTypes["number"] = LuaParameter::Type::Number;
 	parameterTypes["string"] = LuaParameter::Type::String;
 	parameterTypes["userdata"] = LuaParameter::Type::UserData;
+	parameterTypes["integer"] = LuaParameter::Type::Integer;
+	
 
 
 	if (!nameAttribute) {

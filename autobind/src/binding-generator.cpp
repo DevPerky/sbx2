@@ -30,6 +30,7 @@ const std::string BindingGenerator::getLuaTypeString(const LuaParameter &param) 
 		case LuaParameter::Type::String: return "string";
 		case LuaParameter::Type::UserData: return "userdata";
 		case LuaParameter::Type::Table: return "table";
+		case LuaParameter::Type::Integer: return "integer";
 	}
 	return "error";
 }
@@ -202,6 +203,9 @@ const CFunctionSpec BindingGenerator::getLuaCheckTypeFunction(const LuaParameter
 		case LuaParameter::Type::Table:
 			functionName = "lua_istable";
 			break;
+		case LuaParameter::Type::Integer:
+			functionName = "lua_isinteger";
+			break;
 	}
 
 	cParams.push_back(
@@ -241,6 +245,8 @@ const CFunctionSpec BindingGenerator::getLuaToFunction(const LuaParameter &param
 		case LuaParameter::Type::UserData:
 			functionName = "lua_touserdata";
 			break;
+		case LuaParameter::Type::Integer:
+			functionName = "lua_tointeger";
 		case LuaParameter::Type::Table:
 			functionName = generateCustomToFunctionName(parameter.typeName);
 			break;
@@ -294,7 +300,9 @@ const CFunctionSpec BindingGenerator::getLuaPushFunction(const CParameter::Type 
 			setToPushNumber();
 			break;
 		case CParameter::Type::CType::Int:
-			setToPushNumber();
+			if(cType.pointerLevels == 0) {
+				functionName = "lua_pushinteger";
+			}
 			break;
 		case CParameter::Type::CType::Void:
 			if(cType.pointerLevels > 0) {
