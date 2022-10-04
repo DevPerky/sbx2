@@ -89,7 +89,6 @@ void CodeWriter::writeStruct(const CStruct &cStruct) {
     writeNewLine();
     setIndentationLevel(1);
     for(auto &param : cStruct.getMembers()) {
-        m_stringStream << generateIndentationString();
         writeVariableInstance(param, false);
     }
     setIndentationLevel(0);

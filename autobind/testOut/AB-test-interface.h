@@ -1,16 +1,16 @@
 #include <lua.h>
 typedef struct Test {
-		double testNumber;
-		const char *testString;
-		void *testUserData;
+	double testNumber;
+	const char *testString;
+	void *testUserData;
 }Test;
 
 typedef struct Test2 {
-		Test customParam;
+	Test customParam;
 }Test2;
 
 typedef struct TestIntegers {
-		int integer;
+	int integer;
 }TestIntegers;
 
 void AB_registerModule_test(lua_State *L);
