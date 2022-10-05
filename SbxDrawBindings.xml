@@ -22,9 +22,28 @@
         </Members>
     </StructSpec>
 
-    <FunctionSpec name="SetDrawCamera">
+    <FunctionSpec name="SetViewport">
         <In>
-            <Parameter name="camera" type="Camera"/>
+            <Parameter name="bounds" type="Rectangle"/>
+        </In>
+    </FunctionSpec>
+
+    <FunctionSpec name="CreateDrawMatrix">
+        <Out>
+            <Parameter name="handle" type="integer"/>
+        </Out>
+    </FunctionSpec>
+
+    <FunctionSpec name="SetOrtho">
+        <In>
+            <Parameter name="matrixHandle" type="integer"/>
+            <Parameter name="bounds" type="Rectangle"/>
+        </In>
+    </FunctionSpec>
+
+    <FunctionSpec name="SetProjectionMatrix">
+        <In>
+            <Parameter name="matrixHandle" type="integer"/>
         </In>
     </FunctionSpec>
 

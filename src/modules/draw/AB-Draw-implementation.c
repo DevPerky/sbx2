@@ -1,7 +1,10 @@
 #include "AB-Draw-interface.h"
 #include <lauxlib.h>
 
-static AB_SetDrawCamera AB_SetDrawCamera_binding;
+static AB_SetViewport AB_SetViewport_binding;
+static AB_CreateDrawMatrix AB_CreateDrawMatrix_binding;
+static AB_SetOrtho AB_SetOrtho_binding;
+static AB_SetProjectionMatrix AB_SetProjectionMatrix_binding;
 static AB_SetDrawColor AB_SetDrawColor_binding;
 static AB_DrawRectangle AB_DrawRectangle_binding;
 static AB_DrawLine AB_DrawLine_binding;
@@ -103,8 +106,20 @@ int AB_push_Camera(lua_State *L, Camera value) {
 	lua_settable(L, -3);
 }
 
-void AB_bind_SetDrawCamera(AB_SetDrawCamera function) {
-	AB_SetDrawCamera_binding = function;
+void AB_bind_SetViewport(AB_SetViewport function) {
+	AB_SetViewport_binding = function;
+}
+
+void AB_bind_CreateDrawMatrix(AB_CreateDrawMatrix function) {
+	AB_CreateDrawMatrix_binding = function;
+}
+
+void AB_bind_SetOrtho(AB_SetOrtho function) {
+	AB_SetOrtho_binding = function;
+}
+
+void AB_bind_SetProjectionMatrix(AB_SetProjectionMatrix function) {
+	AB_SetProjectionMatrix_binding = function;
 }
 
 void AB_bind_SetDrawColor(AB_SetDrawColor function) {
@@ -123,19 +138,78 @@ void AB_bind_Clear(AB_Clear function) {
 	AB_Clear_binding = function;
 }
 
-static int l_SetDrawCamera(lua_State *L) {
-	Camera camera;
+static int l_SetViewport(lua_State *L) {
+	Rectangle bounds;
 
 	if(lua_istable(L, -1)) {
-		camera = AB_to_Camera(L, -1);
+		bounds = AB_to_Rectangle(L, -1);
 	}
 	else {
-		return luaL_error(L, " Error: Wrong type of parameter camera! Expected type was table");
+		return luaL_error(L, " Error: Wrong type of parameter bounds! Expected type was table");
 	}
 
-	if(AB_SetDrawCamera_binding != 0) {
-		if(AB_SetDrawCamera_binding(camera) == 0) {
-			luaL_error(L, "Runtime error: SetDrawCamera failed for some reason.");
+	if(AB_SetViewport_binding != 0) {
+		if(AB_SetViewport_binding(bounds) == 0) {
+			luaL_error(L, "Runtime error: SetViewport failed for some reason.");
+		}
+	}
+
+	return 0;
+}
+
+static int l_CreateDrawMatrix(lua_State *L) {
+	lua_Integer handle;
+
+	if(AB_CreateDrawMatrix_binding != 0) {
+		if(AB_CreateDrawMatrix_binding(&handle) == 0) {
+			luaL_error(L, "Runtime error: CreateDrawMatrix failed for some reason.");
+		}
+	}
+
+	lua_pushinteger(L, handle);
+	return 1;
+}
+
+static int l_SetOrtho(lua_State *L) {
+	lua_Integer matrixHandle;
+	Rectangle bounds;
+
+	if(lua_istable(L, -1)) {
+		bounds = AB_to_Rectangle(L, -1);
+	}
+	else {
+		return luaL_error(L, " Error: Wrong type of parameter bounds! Expected type was table");
+	}
+
+	if(lua_isinteger(L, -2)) {
+		matrixHandle = lua_tointeger(L, -2);
+	}
+	else {
+		return luaL_error(L, " Error: Wrong type of parameter matrixHandle! Expected type was integer");
+	}
+
+	if(AB_SetOrtho_binding != 0) {
+		if(AB_SetOrtho_binding(matrixHandle, bounds) == 0) {
+			luaL_error(L, "Runtime error: SetOrtho failed for some reason.");
+		}
+	}
+
+	return 0;
+}
+
+static int l_SetProjectionMatrix(lua_State *L) {
+	lua_Integer matrixHandle;
+
+	if(lua_isinteger(L, -1)) {
+		matrixHandle = lua_tointeger(L, -1);
+	}
+	else {
+		return luaL_error(L, " Error: Wrong type of parameter matrixHandle! Expected type was integer");
+	}
+
+	if(AB_SetProjectionMatrix_binding != 0) {
+		if(AB_SetProjectionMatrix_binding(matrixHandle) == 0) {
+			luaL_error(L, "Runtime error: SetProjectionMatrix failed for some reason.");
 		}
 	}
 
@@ -323,7 +397,10 @@ static int l_Clear(lua_State *L) {
 }
 
 void AB_registerModule_Draw(lua_State *L) {
-	lua_register(L, "SetDrawCamera", l_SetDrawCamera);
+	lua_register(L, "SetViewport", l_SetViewport);
+	lua_register(L, "CreateDrawMatrix", l_CreateDrawMatrix);
+	lua_register(L, "SetOrtho", l_SetOrtho);
+	lua_register(L, "SetProjectionMatrix", l_SetProjectionMatrix);
 	lua_register(L, "SetDrawColor", l_SetDrawColor);
 	lua_register(L, "DrawRectangle", l_DrawRectangle);
 	lua_register(L, "DrawLine", l_DrawLine);
