@@ -73,7 +73,7 @@ public:
 
     void deallocateHandle(uint32_t handleInteger) {
         Handle handle = Handle::fromInteger(handleInteger);
-        const std::string errorMessage = "Tried to deallocate invalid handle!" << std::endl; 
+        const std::string errorMessage = "Tried to deallocate invalid handle!\n"; 
         if(handle.index > m_entries.size() - 1) {
             std::cerr << errorMessage;
             return; // TODO: Throw an exception or something

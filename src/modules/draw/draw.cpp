@@ -3,10 +3,7 @@
 #include <glm/vec2.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-<<<<<<< HEAD
 #include "handle.hpp"
-=======
->>>>>>> 2f6e953 (moves the initialization of the projection matrix)
 
 extern "C" {
 #include "AB-Draw-interface.h"
@@ -67,7 +64,6 @@ static int DrawSetColor(double red, double green, double blue, double alpha) {
     return 1;
 }
 
-<<<<<<< HEAD
 static int MatrixNew(lua_Integer *handle) {
     uint32_t matrixHandle = drawMatrices.allocateHandle();
     *handle = (lua_Integer)(matrixHandle);
@@ -97,19 +93,6 @@ static int DrawSetProjectionMatrix(lua_Integer matrixHandle) {
 
 static int DrawSetViewport(Rectangle bounds) {
     glViewport(bounds.left, bounds.top, bounds.right, bounds.bottom);
-=======
-static int SetDrawCamera(Camera camera) {
-    glm::mat4 projection = glm::ortho(
-        camera.viewPort.left,
-        camera.viewPort.right,
-        camera.viewPort.bottom,
-        camera.viewPort.top
-    );
-
-    glMatrixMode(GL_PROJECTION_MATRIX);
-    glLoadMatrixf(glm::value_ptr(projection));
-    glViewport(camera.viewPort.left, camera.viewPort.top, camera.viewPort.right, camera.viewPort.bottom);
->>>>>>> 2f6e953 (moves the initialization of the projection matrix)
     return 1;
 }
 
@@ -126,12 +109,8 @@ void drawInitialize(lua_State *L) {
     AB_bind_DrawClear(DrawClear);
     AB_bind_DrawSetColor(DrawSetColor);
     AB_bind_DrawLine(DrawLine);
-<<<<<<< HEAD
     AB_bind_MatrixNew(MatrixNew);
     AB_bind_MatrixSetOrtho(MatrixSetOrtho);
     AB_bind_DrawSetProjectionMatrix(DrawSetProjectionMatrix);
     AB_bind_DrawSetViewport(DrawSetViewport);
-=======
-    AB_bind_SetDrawCamera(SetDrawCamera);
->>>>>>> 2f6e953 (moves the initialization of the projection matrix)
 }
