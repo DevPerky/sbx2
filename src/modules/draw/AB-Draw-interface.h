@@ -2,21 +2,22 @@
 #define AB_DRAW_H
 
 #include <lua.h>
+
 typedef struct Vector2 {
-		double x;
-		double y;
+	double x;
+	double y;
 }Vector2;
 
 typedef struct Rectangle {
-		double left;
-		double top;
-		double right;
-		double bottom;
+	double left;
+	double top;
+	double right;
+	double bottom;
 }Rectangle;
 
 typedef struct Camera {
-		Vector2 position;
-		Rectangle viewPort;
+	Vector2 position;
+	Rectangle viewPort;
 }Camera;
 
 void AB_registerModule_Draw(lua_State *L);
