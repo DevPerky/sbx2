@@ -9,16 +9,24 @@ local camera = {
 	viewPort = { top = 0, left = 0, right = 800, bottom = 600 }
 }
 
+---@type integer
+local projectionMatrix = 0
+
 function OnWindowResize(width, height)
 	camera.viewPort.right = width
 	camera.viewPort.bottom = height
-	SetDrawCamera(camera)
+	SetOrtho(projectionMatrix, camera.viewPort)
+	SetViewport(camera.viewPort)
+
+	SetProjectionMatrix(projectionMatrix)
 end
 
 function Init()
-	window = CreateWindow(camera.viewPort.right, camera.viewPort.bottom, "test")
-	SetDrawCamera(camera)
 	SetTargetFPS(90)
+	window = CreateWindow(camera.viewPort.right, camera.viewPort.bottom, "test")
+	projectionMatrix = CreateDrawMatrix()
+	OnWindowResize(camera.viewPort.right, camera.viewPort.bottom)
+	print(projectionMatrix)
 end
 
 function Update()
