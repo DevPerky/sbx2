@@ -53,6 +53,8 @@ public:
             m_freeList.pop();
 
             m_entries[index].value = m_constructor();
+            m_entries[index].handle.index = index;
+            
             handle = m_entries[index].handle;           
         }
         else {
