@@ -73,15 +73,22 @@ public:
 
     void deallocateHandle(uint32_t handleInteger) {
         Handle handle = Handle::fromInteger(handleInteger);
+<<<<<<< HEAD
         const std::string errorMessage = "Tried to deallocate invalid handle!\n"; 
         if(handle.index > m_entries.size() - 1) {
             std::cerr << errorMessage;
+=======
+        if(handle.index > m_entries.size() - 1) {
+>>>>>>> e5bdf49 (implements an array dealing utilizing generational handles)
             return; // TODO: Throw an exception or something
         }
 
         const Entry &entry = m_entries[handle.index];
         if(entry.handle.generation != handle.generation) {
+<<<<<<< HEAD
             std::cerr << errorMessage;
+=======
+>>>>>>> e5bdf49 (implements an array dealing utilizing generational handles)
             return; // TODO: Throw an exception or something
         }
 
@@ -93,7 +100,10 @@ public:
         Handle handle = Handle::fromInteger(handleInteger);
         Entry &entry = m_entries[handle.index];
         if(entry.handle.generation != handle.generation) {
+<<<<<<< HEAD
             std::cerr << "Tried dereferencing invalid handle!" << std::endl;
+=======
+>>>>>>> e5bdf49 (implements an array dealing utilizing generational handles)
             return nullptr;
         }
         
