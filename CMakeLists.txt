@@ -7,12 +7,12 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-cmake_path(CONVERT "../SbxAppBindings.xml" TO_NATIVE_PATH_LIST SbxAppBindings)
-cmake_path(CONVERT "../SbxDrawBindings.xml" TO_NATIVE_PATH_LIST SbxDrawBindings)
-cmake_path(CONVERT "../lua-definitions" TO_NATIVE_PATH_LIST LuaDefinitions)
+cmake_path(SET SbxAppBindings   "${CMAKE_CURRENT_SOURCE_DIR}/SbxAppBindings.xml" )
+cmake_path(SET SbxDrawBindings  "${CMAKE_CURRENT_SOURCE_DIR}/SbxDrawBindings.xml")
+cmake_path(SET LuaDefinitions   "${CMAKE_CURRENT_SOURCE_DIR}/lua-definitions")
 
-cmake_path(CONVERT "../src/modules/app" TO_NATIVE_PATH_LIST AppModuleDir)
-cmake_path(CONVERT "../src/modules/draw" TO_NATIVE_PATH_LIST DrawModuleDir)
+cmake_path(SET AppModuleDir     "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/app")
+cmake_path(SET DrawModuleDir    "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/draw")
 
 add_subdirectory(glfw)
 add_subdirectory(tinyxml2)
@@ -41,6 +41,7 @@ target_link_libraries(sbx lua_static)
 target_link_libraries(sbx glfw)
 target_link_libraries(sbx OpenGL::GL)
 target_include_directories(sbx PUBLIC glm)
+target_include_directories(sbx PUBLIC src)
 
 target_link_libraries(autobind tinyxml2)
 
