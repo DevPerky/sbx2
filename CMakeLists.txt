@@ -18,6 +18,7 @@ add_subdirectory(dependencies/glfw)
 add_subdirectory(dependencies/tinyxml2)
 add_subdirectory(dependencies/Lua)
 add_subdirectory(dependencies/glm)
+add_subdirectory(dependencies/glad)
 
 find_package(OpenGL REQUIRED)
 
@@ -40,6 +41,8 @@ add_executable(autobind
 target_link_libraries(sbx lua_static)
 target_link_libraries(sbx glfw)
 target_link_libraries(sbx OpenGL::GL)
+target_link_libraries(sbx glad)
+target_include_directories(sbx PUBLIC dependencies/glad/include)
 target_include_directories(sbx PUBLIC dependencies/glm)
 target_include_directories(sbx PUBLIC src)
 
