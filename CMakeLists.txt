@@ -41,7 +41,7 @@ target_link_libraries(sbx lua_static)
 target_link_libraries(sbx glfw)
 target_link_libraries(sbx OpenGL::GL)
 target_include_directories(sbx PUBLIC dependencies/glm)
-
+target_include_directories(sbx PUBLIC src)
 target_link_libraries(autobind tinyxml2)
 
 
