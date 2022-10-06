@@ -15,13 +15,6 @@
         </Members>
     </StructSpec>
 
-    <StructSpec name="Camera">
-        <Members>
-            <Parameter name="position" type="Vector2"/>
-            <Parameter name="viewPort" type="Rectangle"/>
-        </Members>
-    </StructSpec>
-
     <FunctionSpec name="DrawSetViewport">
         <In>
             <Parameter name="bounds" type="Rectangle"/>

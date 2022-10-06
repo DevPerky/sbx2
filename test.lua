@@ -4,28 +4,25 @@ require("math")
 
 local window = nil
 
----@type Camera
-local camera = {
-	position = { x=0, y=0},
-	viewPort = { top = 0, left = 0, right = 800, bottom = 600 }
-}
+---@type Rectangle
+local viewPort = { top = 0, left = 0, right = 800, bottom = 600 }
 
 ---@type integer
 local projectionMatrix = 0
 
 function OnWindowResize(width, height)
-	camera.viewPort.right = width
-	camera.viewPort.bottom = height
-	MatrixSetOrtho(projectionMatrix, camera.viewPort)
-	DrawSetViewport(camera.viewPort)
+	viewPort.right = width
+	viewPort.bottom = height
+	MatrixSetOrtho(projectionMatrix, viewPort)
+	DrawSetViewport(viewPort)
 	DrawSetProjectionMatrix(projectionMatrix)
 end
 
 function Init()
 	SetTargetFPS(90)
-	window = CreateWindow(camera.viewPort.right, camera.viewPort.bottom, "test")
+	window = CreateWindow(viewPort.right, viewPort.bottom, "test")
 	projectionMatrix = MatrixNew()
-	OnWindowResize(camera.viewPort.right, camera.viewPort.bottom)
+	OnWindowResize(viewPort.right, viewPort.bottom)
 	print(projectionMatrix)
 end
 
@@ -33,7 +30,7 @@ function Update()
 	DrawClear(0.1, 0.1, 0.1, 1.0)
 	local seconds = GetSeconds()
 	local x, y = GetMouseXY(window)
-	local w, h = camera.viewPort.right, camera.viewPort.bottom
+	local w, h = viewPort.right, viewPort.bottom
 	
 	---@type Vector2
 	local mousePos = { x=x, y=y }

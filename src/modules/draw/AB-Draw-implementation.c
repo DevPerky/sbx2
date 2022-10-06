@@ -13,10 +13,8 @@ static AB_DrawClear AB_DrawClear_binding;
 
 static Vector2 AB_to_Vector2(lua_State *L, int index);
 static Rectangle AB_to_Rectangle(lua_State *L, int index);
-static Camera AB_to_Camera(lua_State *L, int index);
 int AB_push_Vector2(lua_State *L, Vector2 value);
 int AB_push_Rectangle(lua_State *L, Rectangle value);
-int AB_push_Camera(lua_State *L, Camera value);
 
 static Vector2 AB_to_Vector2(lua_State *L, int index) {
 	Vector2 result;
@@ -45,19 +43,6 @@ static Rectangle AB_to_Rectangle(lua_State *L, int index) {
 	lua_pop(L, 1);
 	lua_getfield(L, index, "bottom");
 	result.bottom = lua_tonumber(L, -1);
-	lua_pop(L, 1);
-
-	return result;
-}
-
-static Camera AB_to_Camera(lua_State *L, int index) {
-	Camera result;
-
-	lua_getfield(L, index, "position");
-	result.position = AB_to_Vector2(L, -1);
-	lua_pop(L, 1);
-	lua_getfield(L, index, "viewPort");
-	result.viewPort = AB_to_Rectangle(L, -1);
 	lua_pop(L, 1);
 
 	return result;
@@ -92,18 +77,6 @@ int AB_push_Rectangle(lua_State *L, Rectangle value) {
 
 	lua_pushstring(L, "bottom");
 	lua_pushnumber(L, value.bottom);
-	lua_settable(L, -3);
-}
-
-int AB_push_Camera(lua_State *L, Camera value) {
-	lua_createtable(L, 0, 2);
-
-	lua_pushstring(L, "position");
-	AB_push_Vector2(L, value.position);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "viewPort");
-	AB_push_Rectangle(L, value.viewPort);
 	lua_settable(L, -3);
 }
 

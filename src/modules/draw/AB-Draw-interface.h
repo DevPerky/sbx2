@@ -15,11 +15,6 @@ typedef struct Rectangle {
 	double bottom;
 }Rectangle;
 
-typedef struct Camera {
-	Vector2 position;
-	Rectangle viewPort;
-}Camera;
-
 void AB_registerModule_Draw(lua_State *L);
 typedef int (*AB_DrawSetViewport)(Rectangle bounds);
 typedef int (*AB_MatrixNew)(lua_Integer *handle);
