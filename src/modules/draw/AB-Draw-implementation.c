@@ -4,6 +4,7 @@
 static AB_DrawSetViewport AB_DrawSetViewport_binding;
 static AB_MatrixNew AB_MatrixNew_binding;
 static AB_MatrixSetOrtho AB_MatrixSetOrtho_binding;
+static AB_DrawCircle AB_DrawCircle_binding;
 static AB_DrawSetProjectionMatrix AB_DrawSetProjectionMatrix_binding;
 static AB_DrawSetColor AB_DrawSetColor_binding;
 static AB_DrawRectangle AB_DrawRectangle_binding;
@@ -118,6 +119,10 @@ void AB_bind_MatrixSetOrtho(AB_MatrixSetOrtho function) {
 	AB_MatrixSetOrtho_binding = function;
 }
 
+void AB_bind_DrawCircle(AB_DrawCircle function) {
+	AB_DrawCircle_binding = function;
+}
+
 void AB_bind_DrawSetProjectionMatrix(AB_DrawSetProjectionMatrix function) {
 	AB_DrawSetProjectionMatrix_binding = function;
 }
@@ -191,6 +196,33 @@ static int l_MatrixSetOrtho(lua_State *L) {
 	if(AB_MatrixSetOrtho_binding != 0) {
 		if(AB_MatrixSetOrtho_binding(matrixHandle, bounds) == 0) {
 			luaL_error(L, "Runtime error: MatrixSetOrtho failed for some reason.");
+		}
+	}
+
+	return 0;
+}
+
+static int l_DrawCircle(lua_State *L) {
+	Vector2 position;
+	double radius;
+
+	if(lua_isnumber(L, -1)) {
+		radius = lua_tonumber(L, -1);
+	}
+	else {
+		return luaL_error(L, " Error: Wrong type of parameter radius! Expected type was number");
+	}
+
+	if(lua_istable(L, -2)) {
+		position = AB_to_Vector2(L, -2);
+	}
+	else {
+		return luaL_error(L, " Error: Wrong type of parameter position! Expected type was table");
+	}
+
+	if(AB_DrawCircle_binding != 0) {
+		if(AB_DrawCircle_binding(position, radius) == 0) {
+			luaL_error(L, "Runtime error: DrawCircle failed for some reason.");
 		}
 	}
 
@@ -400,6 +432,7 @@ void AB_registerModule_Draw(lua_State *L) {
 	lua_register(L, "DrawSetViewport", l_DrawSetViewport);
 	lua_register(L, "MatrixNew", l_MatrixNew);
 	lua_register(L, "MatrixSetOrtho", l_MatrixSetOrtho);
+	lua_register(L, "DrawCircle", l_DrawCircle);
 	lua_register(L, "DrawSetProjectionMatrix", l_DrawSetProjectionMatrix);
 	lua_register(L, "DrawSetColor", l_DrawSetColor);
 	lua_register(L, "DrawRectangle", l_DrawRectangle);

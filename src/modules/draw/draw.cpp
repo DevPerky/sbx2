@@ -96,6 +96,32 @@ static int DrawSetViewport(Rectangle bounds) {
     return 1;
 }
 
+static int DrawCircle(Vector2 position, double radius) {
+    const int resolution = 12;
+
+    glBegin(GL_TRIANGLES);
+    for(int i = 0; i < resolution; i++) {
+        constexpr float pi = glm::pi<float>();
+        double radians1 = -(pi * 2 / (float)resolution) * (float)i;
+        double radians2 = -(pi * 2 / (float)resolution) * (float)(i+1);
+        glm::vec2 vertexOnRadius1(cos(radians1) * radius, sin(radians1) * radius);
+        glm::vec2 vertexOnRadius2(cos(radians2) * radius, sin(radians2) * radius);
+        
+        vertexOnRadius1.x += position.x;
+        vertexOnRadius1.y += position.y;
+        vertexOnRadius2.x += position.x;
+        vertexOnRadius2.y += position.y;
+        glVertex2d(position.x, position.y);
+        glVertex2d(vertexOnRadius1.x, vertexOnRadius1.y);
+        glVertex2d(vertexOnRadius2.x, vertexOnRadius2.y);
+        
+    }
+    glEnd();
+
+    return 1;
+}
+
+
 void drawInitialize(lua_State *L) {
     AB_registerModule_Draw(L);
     AB_bind_DrawRectangle(DrawRectangle);
@@ -106,4 +132,5 @@ void drawInitialize(lua_State *L) {
     AB_bind_MatrixSetOrtho(MatrixSetOrtho);
     AB_bind_DrawSetProjectionMatrix(DrawSetProjectionMatrix);
     AB_bind_DrawSetViewport(DrawSetViewport);
+    AB_bind_DrawCircle(DrawCircle);
 }

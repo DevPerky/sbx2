@@ -41,6 +41,13 @@
         </In>
     </FunctionSpec>
 
+    <FunctionSpec name="DrawCircle">
+        <In>
+            <Parameter name="position" type="Vector2"/>
+            <Parameter name="radius" type="number"/>
+        </In>
+    </FunctionSpec>
+
     <FunctionSpec name="DrawSetProjectionMatrix">
         <In>
             <Parameter name="matrixHandle" type="integer"/>

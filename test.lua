@@ -1,5 +1,6 @@
 ---@module 'App-lib'
 ---@module 'Draw-lib'
+require("math")
 
 local window = nil
 
@@ -34,10 +35,14 @@ function Update()
 	local x, y = GetMouseXY(window)
 	local w, h = camera.viewPort.right, camera.viewPort.bottom
 	
+	---@type Vector2
+	local mousePos = { x=x, y=y }
+
 	DrawSetColor(0, 0, 1, 1)
 	DrawLine(0, 0, x, y, 10);
-	DrawSetColor(1, 0, 0, 1);
-	DrawRectangle(0, h-20, (seconds/60)*w, h)
 	DrawSetColor(0, 1, 0, 1);
 	DrawRectangle(x - 5, y - 5, x + 5, y + 5)
+	DrawCircle(mousePos, (math.cos(seconds * 50)/2 + 1) * 20)
+	DrawSetColor(1, 0, 0, 1);
+	DrawRectangle(0, h-20, (seconds/60)*w, h)
 end
