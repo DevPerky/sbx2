@@ -14,10 +14,10 @@ cmake_path(CONVERT "../lua-definitions" TO_NATIVE_PATH_LIST LuaDefinitions)
 cmake_path(CONVERT "../src/modules/app" TO_NATIVE_PATH_LIST AppModuleDir)
 cmake_path(CONVERT "../src/modules/draw" TO_NATIVE_PATH_LIST DrawModuleDir)
 
-add_subdirectory(glfw)
-add_subdirectory(tinyxml2)
-add_subdirectory(Lua)
-add_subdirectory(glm)
+add_subdirectory(dependencies/glfw)
+add_subdirectory(dependencies/tinyxml2)
+add_subdirectory(dependencies/Lua)
+add_subdirectory(dependencies/glm)
 
 find_package(OpenGL REQUIRED)
 
@@ -40,7 +40,7 @@ add_executable(autobind
 target_link_libraries(sbx lua_static)
 target_link_libraries(sbx glfw)
 target_link_libraries(sbx OpenGL::GL)
-target_include_directories(sbx PUBLIC glm)
+target_include_directories(sbx PUBLIC dependencies/glm)
 
 target_link_libraries(autobind tinyxml2)
 
