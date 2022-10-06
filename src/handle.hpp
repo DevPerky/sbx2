@@ -4,6 +4,7 @@
 #include <vector>
 #include <queue>
 #include <memory>
+#include <iostream>
 
 template <class T> class HandleBoundArray {
 private:
@@ -72,12 +73,15 @@ public:
 
     void deallocateHandle(uint32_t handleInteger) {
         Handle handle = Handle::fromInteger(handleInteger);
+        const std::string errorMessage = "Tried to deallocate invalid handle!" << std::endl; 
         if(handle.index > m_entries.size() - 1) {
+            std::cerr << errorMessage;
             return; // TODO: Throw an exception or something
         }
 
         const Entry &entry = m_entries[handle.index];
         if(entry.handle.generation != handle.generation) {
+            std::cerr << errorMessage;
             return; // TODO: Throw an exception or something
         }
 
@@ -89,6 +93,7 @@ public:
         Handle handle = Handle::fromInteger(handleInteger);
         Entry &entry = m_entries[handle.index];
         if(entry.handle.generation != handle.generation) {
+            std::cerr << "Tried dereferencing invalid handle!" << std::endl;
             return nullptr;
         }
         
