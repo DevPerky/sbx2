@@ -40,14 +40,8 @@ add_executable(autobind
 target_link_libraries(sbx lua_static)
 target_link_libraries(sbx glfw)
 target_link_libraries(sbx OpenGL::GL)
-<<<<<<< HEAD
 target_include_directories(sbx PUBLIC dependencies/glm)
 target_include_directories(sbx PUBLIC src)
-=======
-target_include_directories(sbx PUBLIC glm)
-target_include_directories(sbx PUBLIC src)
-
->>>>>>> 64a055b (fixes some paths)
 target_link_libraries(autobind tinyxml2)
 
 
