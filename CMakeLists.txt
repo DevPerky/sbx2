@@ -14,10 +14,10 @@ cmake_path(SET LuaDefinitions   "${CMAKE_CURRENT_SOURCE_DIR}/lua-definitions")
 cmake_path(SET AppModuleDir     "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/app")
 cmake_path(SET DrawModuleDir    "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/draw")
 
-add_subdirectory(glfw)
-add_subdirectory(tinyxml2)
-add_subdirectory(Lua)
-add_subdirectory(glm)
+add_subdirectory(dependencies/glfw)
+add_subdirectory(dependencies/tinyxml2)
+add_subdirectory(dependencies/Lua)
+add_subdirectory(dependencies/glm)
 
 find_package(OpenGL REQUIRED)
 
@@ -40,7 +40,7 @@ add_executable(autobind
 target_link_libraries(sbx lua_static)
 target_link_libraries(sbx glfw)
 target_link_libraries(sbx OpenGL::GL)
-target_include_directories(sbx PUBLIC glm)
+target_include_directories(sbx PUBLIC dependencies/glm)
 target_include_directories(sbx PUBLIC src)
 
 target_link_libraries(autobind tinyxml2)

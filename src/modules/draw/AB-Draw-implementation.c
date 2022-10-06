@@ -1,14 +1,14 @@
 #include "AB-Draw-interface.h"
 #include <lauxlib.h>
 
-static AB_SetViewport AB_SetViewport_binding;
-static AB_CreateDrawMatrix AB_CreateDrawMatrix_binding;
-static AB_SetOrtho AB_SetOrtho_binding;
-static AB_SetProjectionMatrix AB_SetProjectionMatrix_binding;
-static AB_SetDrawColor AB_SetDrawColor_binding;
+static AB_DrawSetViewport AB_DrawSetViewport_binding;
+static AB_MatrixNew AB_MatrixNew_binding;
+static AB_MatrixSetOrtho AB_MatrixSetOrtho_binding;
+static AB_DrawSetProjectionMatrix AB_DrawSetProjectionMatrix_binding;
+static AB_DrawSetColor AB_DrawSetColor_binding;
 static AB_DrawRectangle AB_DrawRectangle_binding;
 static AB_DrawLine AB_DrawLine_binding;
-static AB_Clear AB_Clear_binding;
+static AB_DrawClear AB_DrawClear_binding;
 
 static Vector2 AB_to_Vector2(lua_State *L, int index);
 static Rectangle AB_to_Rectangle(lua_State *L, int index);
@@ -106,24 +106,24 @@ int AB_push_Camera(lua_State *L, Camera value) {
 	lua_settable(L, -3);
 }
 
-void AB_bind_SetViewport(AB_SetViewport function) {
-	AB_SetViewport_binding = function;
+void AB_bind_DrawSetViewport(AB_DrawSetViewport function) {
+	AB_DrawSetViewport_binding = function;
 }
 
-void AB_bind_CreateDrawMatrix(AB_CreateDrawMatrix function) {
-	AB_CreateDrawMatrix_binding = function;
+void AB_bind_MatrixNew(AB_MatrixNew function) {
+	AB_MatrixNew_binding = function;
 }
 
-void AB_bind_SetOrtho(AB_SetOrtho function) {
-	AB_SetOrtho_binding = function;
+void AB_bind_MatrixSetOrtho(AB_MatrixSetOrtho function) {
+	AB_MatrixSetOrtho_binding = function;
 }
 
-void AB_bind_SetProjectionMatrix(AB_SetProjectionMatrix function) {
-	AB_SetProjectionMatrix_binding = function;
+void AB_bind_DrawSetProjectionMatrix(AB_DrawSetProjectionMatrix function) {
+	AB_DrawSetProjectionMatrix_binding = function;
 }
 
-void AB_bind_SetDrawColor(AB_SetDrawColor function) {
-	AB_SetDrawColor_binding = function;
+void AB_bind_DrawSetColor(AB_DrawSetColor function) {
+	AB_DrawSetColor_binding = function;
 }
 
 void AB_bind_DrawRectangle(AB_DrawRectangle function) {
@@ -134,11 +134,11 @@ void AB_bind_DrawLine(AB_DrawLine function) {
 	AB_DrawLine_binding = function;
 }
 
-void AB_bind_Clear(AB_Clear function) {
-	AB_Clear_binding = function;
+void AB_bind_DrawClear(AB_DrawClear function) {
+	AB_DrawClear_binding = function;
 }
 
-static int l_SetViewport(lua_State *L) {
+static int l_DrawSetViewport(lua_State *L) {
 	Rectangle bounds;
 
 	if(lua_istable(L, -1)) {
@@ -148,21 +148,21 @@ static int l_SetViewport(lua_State *L) {
 		return luaL_error(L, " Error: Wrong type of parameter bounds! Expected type was table");
 	}
 
-	if(AB_SetViewport_binding != 0) {
-		if(AB_SetViewport_binding(bounds) == 0) {
-			luaL_error(L, "Runtime error: SetViewport failed for some reason.");
+	if(AB_DrawSetViewport_binding != 0) {
+		if(AB_DrawSetViewport_binding(bounds) == 0) {
+			luaL_error(L, "Runtime error: DrawSetViewport failed for some reason.");
 		}
 	}
 
 	return 0;
 }
 
-static int l_CreateDrawMatrix(lua_State *L) {
+static int l_MatrixNew(lua_State *L) {
 	lua_Integer handle;
 
-	if(AB_CreateDrawMatrix_binding != 0) {
-		if(AB_CreateDrawMatrix_binding(&handle) == 0) {
-			luaL_error(L, "Runtime error: CreateDrawMatrix failed for some reason.");
+	if(AB_MatrixNew_binding != 0) {
+		if(AB_MatrixNew_binding(&handle) == 0) {
+			luaL_error(L, "Runtime error: MatrixNew failed for some reason.");
 		}
 	}
 
@@ -170,7 +170,7 @@ static int l_CreateDrawMatrix(lua_State *L) {
 	return 1;
 }
 
-static int l_SetOrtho(lua_State *L) {
+static int l_MatrixSetOrtho(lua_State *L) {
 	lua_Integer matrixHandle;
 	Rectangle bounds;
 
@@ -188,16 +188,16 @@ static int l_SetOrtho(lua_State *L) {
 		return luaL_error(L, " Error: Wrong type of parameter matrixHandle! Expected type was integer");
 	}
 
-	if(AB_SetOrtho_binding != 0) {
-		if(AB_SetOrtho_binding(matrixHandle, bounds) == 0) {
-			luaL_error(L, "Runtime error: SetOrtho failed for some reason.");
+	if(AB_MatrixSetOrtho_binding != 0) {
+		if(AB_MatrixSetOrtho_binding(matrixHandle, bounds) == 0) {
+			luaL_error(L, "Runtime error: MatrixSetOrtho failed for some reason.");
 		}
 	}
 
 	return 0;
 }
 
-static int l_SetProjectionMatrix(lua_State *L) {
+static int l_DrawSetProjectionMatrix(lua_State *L) {
 	lua_Integer matrixHandle;
 
 	if(lua_isinteger(L, -1)) {
@@ -207,16 +207,16 @@ static int l_SetProjectionMatrix(lua_State *L) {
 		return luaL_error(L, " Error: Wrong type of parameter matrixHandle! Expected type was integer");
 	}
 
-	if(AB_SetProjectionMatrix_binding != 0) {
-		if(AB_SetProjectionMatrix_binding(matrixHandle) == 0) {
-			luaL_error(L, "Runtime error: SetProjectionMatrix failed for some reason.");
+	if(AB_DrawSetProjectionMatrix_binding != 0) {
+		if(AB_DrawSetProjectionMatrix_binding(matrixHandle) == 0) {
+			luaL_error(L, "Runtime error: DrawSetProjectionMatrix failed for some reason.");
 		}
 	}
 
 	return 0;
 }
 
-static int l_SetDrawColor(lua_State *L) {
+static int l_DrawSetColor(lua_State *L) {
 	double red;
 	double green;
 	double blue;
@@ -250,9 +250,9 @@ static int l_SetDrawColor(lua_State *L) {
 		return luaL_error(L, " Error: Wrong type of parameter red! Expected type was number");
 	}
 
-	if(AB_SetDrawColor_binding != 0) {
-		if(AB_SetDrawColor_binding(red, green, blue, alpha) == 0) {
-			luaL_error(L, "Runtime error: SetDrawColor failed for some reason.");
+	if(AB_DrawSetColor_binding != 0) {
+		if(AB_DrawSetColor_binding(red, green, blue, alpha) == 0) {
+			luaL_error(L, "Runtime error: DrawSetColor failed for some reason.");
 		}
 	}
 
@@ -353,7 +353,7 @@ static int l_DrawLine(lua_State *L) {
 	return 0;
 }
 
-static int l_Clear(lua_State *L) {
+static int l_DrawClear(lua_State *L) {
 	double red;
 	double green;
 	double blue;
@@ -387,9 +387,9 @@ static int l_Clear(lua_State *L) {
 		return luaL_error(L, " Error: Wrong type of parameter red! Expected type was number");
 	}
 
-	if(AB_Clear_binding != 0) {
-		if(AB_Clear_binding(red, green, blue, alpha) == 0) {
-			luaL_error(L, "Runtime error: Clear failed for some reason.");
+	if(AB_DrawClear_binding != 0) {
+		if(AB_DrawClear_binding(red, green, blue, alpha) == 0) {
+			luaL_error(L, "Runtime error: DrawClear failed for some reason.");
 		}
 	}
 
@@ -397,12 +397,12 @@ static int l_Clear(lua_State *L) {
 }
 
 void AB_registerModule_Draw(lua_State *L) {
-	lua_register(L, "SetViewport", l_SetViewport);
-	lua_register(L, "CreateDrawMatrix", l_CreateDrawMatrix);
-	lua_register(L, "SetOrtho", l_SetOrtho);
-	lua_register(L, "SetProjectionMatrix", l_SetProjectionMatrix);
-	lua_register(L, "SetDrawColor", l_SetDrawColor);
+	lua_register(L, "DrawSetViewport", l_DrawSetViewport);
+	lua_register(L, "MatrixNew", l_MatrixNew);
+	lua_register(L, "MatrixSetOrtho", l_MatrixSetOrtho);
+	lua_register(L, "DrawSetProjectionMatrix", l_DrawSetProjectionMatrix);
+	lua_register(L, "DrawSetColor", l_DrawSetColor);
 	lua_register(L, "DrawRectangle", l_DrawRectangle);
 	lua_register(L, "DrawLine", l_DrawLine);
-	lua_register(L, "Clear", l_Clear);
+	lua_register(L, "DrawClear", l_DrawClear);
 }

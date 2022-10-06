@@ -51,26 +51,26 @@ static int DrawLine(double xFrom, double yFrom, double xTo, double yTo, double w
     return 1;
 }
 
-static int Clear(double red, double green, double blue, double alpha) {
+static int DrawClear(double red, double green, double blue, double alpha) {
     glClearColor(red, green, blue, alpha);
     glClear(GL_COLOR_BUFFER_BIT);
 
     return 1;
 }
 
-static int SetDrawColor(double red, double green, double blue, double alpha) {
+static int DrawSetColor(double red, double green, double blue, double alpha) {
     glColor4f(red, green, blue, alpha);
 
     return 1;
 }
 
-static int CreateDrawMatrix(lua_Integer *handle) {
+static int MatrixNew(lua_Integer *handle) {
     uint32_t matrixHandle = drawMatrices.allocateHandle();
     *handle = (lua_Integer)(matrixHandle);
     return 1;
 }
 
-static int SetOrtho(lua_Integer handle, Rectangle bounds) {
+static int MatrixSetOrtho(lua_Integer handle, Rectangle bounds) {
     glm::mat4 *matrix = drawMatrices.get((uint32_t)handle);
     if(matrix == nullptr) {
         return 0;
@@ -79,7 +79,7 @@ static int SetOrtho(lua_Integer handle, Rectangle bounds) {
     return 1;
 }
 
-static int SetProjectionMatrix(lua_Integer matrixHandle) {
+static int DrawSetProjectionMatrix(lua_Integer matrixHandle) {
     glm::mat4 *matrix = drawMatrices.get((uint32_t)matrixHandle);
     if(matrix == nullptr) {
         return 0;
@@ -91,7 +91,7 @@ static int SetProjectionMatrix(lua_Integer matrixHandle) {
     return 1;
 }
 
-static int SetViewport(Rectangle bounds) {
+static int DrawSetViewport(Rectangle bounds) {
     glViewport(bounds.left, bounds.top, bounds.right, bounds.bottom);
     return 1;
 }
@@ -99,11 +99,11 @@ static int SetViewport(Rectangle bounds) {
 void drawInitialize(lua_State *L) {
     AB_registerModule_Draw(L);
     AB_bind_DrawRectangle(DrawRectangle);
-    AB_bind_Clear(Clear);
-    AB_bind_SetDrawColor(SetDrawColor);
+    AB_bind_DrawClear(DrawClear);
+    AB_bind_DrawSetColor(DrawSetColor);
     AB_bind_DrawLine(DrawLine);
-    AB_bind_CreateDrawMatrix(CreateDrawMatrix);
-    AB_bind_SetOrtho(SetOrtho);
-    AB_bind_SetProjectionMatrix(SetProjectionMatrix);
-    AB_bind_SetViewport(SetViewport);
+    AB_bind_MatrixNew(MatrixNew);
+    AB_bind_MatrixSetOrtho(MatrixSetOrtho);
+    AB_bind_DrawSetProjectionMatrix(DrawSetProjectionMatrix);
+    AB_bind_DrawSetViewport(DrawSetViewport);
 }
