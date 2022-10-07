@@ -30,6 +30,7 @@ add_executable(sbx
     src/modules/draw/draw.cpp
     src/modules/draw/primitive.cpp
     src/modules/draw/graphics.cpp
+    src/modules/draw/shader.cpp
 )
 
 add_executable(autobind 
