@@ -7,7 +7,7 @@ Primitive::Primitive(Type type, const std::vector<glm::vec2> &vertices) {
     m_type = type;
 }
 
-Primitive Primitive::CreateRectangle() {
+Primitive Primitive::createRectangle() {
     std::vector<glm::vec2> vertices {
         glm::vec2(-0.5, 0.5),
         glm::vec2(-0.5, -0.5),
@@ -18,7 +18,7 @@ Primitive Primitive::CreateRectangle() {
     return Primitive(Type::Circle, vertices);
 }
 
-Primitive Primitive::CreateTriangle() {
+Primitive Primitive::createTriangle() {
     std::vector<glm::vec2> vertices {
         glm::vec2(0.0, 0.5),
         glm::vec2(-0.5, -0.5),
@@ -28,7 +28,7 @@ Primitive Primitive::CreateTriangle() {
     return Primitive(Type::Triangle, vertices);
 }
 
-Primitive Primitive::CreateCircle(int resolution) {
+Primitive Primitive::createCircle(int resolution) {
     if(resolution < 3)  {
         resolution = 3;
     }

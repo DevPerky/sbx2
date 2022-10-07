@@ -20,10 +20,10 @@ public:
     inline const std::vector<glm::vec2> getVertices() const {
         return m_vertices;
     }
-    
-    static Primitive CreateRectangle();
-    static Primitive CreateTriangle();
-    static Primitive CreateCircle(int resolution);
+
+    static Primitive createRectangle();
+    static Primitive createTriangle();
+    static Primitive createCircle(int resolution);
 };
 
 #endif

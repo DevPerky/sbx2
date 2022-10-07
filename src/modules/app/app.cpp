@@ -24,7 +24,7 @@ static int CreateWindow(double width, double height, const char *title, void **w
 	glfwWindow = glfwCreateWindow((int)width, (int)height, title, NULL, NULL);
 	glfwMakeContextCurrent(glfwWindow);
 	*windowOut = glfwWindow;
-	bool initGraphics = Graphics::Initialize((GraphicsInitProc)glfwGetProcAddress);
+	bool initGraphics = Graphics::initialize((GraphicsInitProc)glfwGetProcAddress);
 	return glfwWindow != 0 && initGraphics;
 }
 
