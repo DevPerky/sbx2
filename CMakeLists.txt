@@ -28,6 +28,7 @@ add_executable(sbx
     src/modules/app/AB-App-implementation.c
     src/modules/draw/AB-Draw-implementation.c
     src/modules/draw/draw.cpp
+    src/modules/draw/primitive.cpp
 )
 
 add_executable(autobind 
