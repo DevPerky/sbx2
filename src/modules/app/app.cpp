@@ -3,6 +3,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include "../draw/graphics.hpp"
+
 
 extern "C" {
 #include <GLFW/glfw3.h>
@@ -22,8 +24,8 @@ static int CreateWindow(double width, double height, const char *title, void **w
 	glfwWindow = glfwCreateWindow((int)width, (int)height, title, NULL, NULL);
 	glfwMakeContextCurrent(glfwWindow);
 	*windowOut = glfwWindow;
-
-	return glfwWindow != 0;
+	bool initGraphics = Graphics::Initialize((GraphicsInitProc)glfwGetProcAddress);
+	return glfwWindow != 0 && initGraphics;
 }
 
 static int CloseWindow(void *window) {
